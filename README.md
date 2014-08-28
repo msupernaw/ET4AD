@@ -19,6 +19,7 @@ Example:
     //et4ad::BasicVariable<data type, group identifier, storage type>                      
     typedef et4ad::BasicVariable<double, 0, Storage_Type> Var;
 
+    int size = 10;
 
     et4ad::Array<Var > x(size);
     
