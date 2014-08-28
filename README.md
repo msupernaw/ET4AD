@@ -4,7 +4,7 @@ ET4AD
 Expression Templates For Automatic Differentiation. 
 
 
-Essentially the same algorithm as ADNumber using expression templates to speed things up. Calculates expression level derivatives using intermediate derivative storage rather than the traditional stack or tape method. An expression can also be "recorded" in a stack and provide partial derivatives of arbitrary order. There are several policies for strorage at the individual variable level, to include:
+Essentially the same algorithm as ADNumber using template metaprogramming to speed things up. Calculates expression level derivatives using intermediate derivative storage rather than the traditional stack or tape method. An expression can also be "recorded" in a stack and provide partial derivatives of arbitrary order. There are several policies for strorage at the individual variable level, to include:
 
 1. StackStorage   - gradients are stored in a stack allocated array.
 2. DynamicStorage - gradients are stored in a dynamically allocated array.
