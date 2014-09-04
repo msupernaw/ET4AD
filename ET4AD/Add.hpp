@@ -41,9 +41,8 @@ namespace et4ad {
             return lhs_m.Derivative(id) + rhs_m.Derivative(id);
         }
 
-        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-            lhs_m.PushIds(storage);
-            rhs_m.PushIds(storage);
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return lhs_m.ComplexStepValue(id, h) + rhs_m.ComplexStepValue(id, h);
         }
 
         inline void PushIds(et4ad::IDSet & ids) const {
@@ -55,11 +54,6 @@ namespace et4ad {
             lhs_m.PushStatements(storage);
             rhs_m.PushStatements(storage);
             storage.push_back(Statement<REAL_T > (PLUS));
-        }
-
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            lhs_m.PushAll(storage);
-            rhs_m.PushAll(storage);
         }
 
 
@@ -78,7 +72,7 @@ namespace et4ad {
      */
     template <class REAL_T, class LHS, class RHS>
     inline Add<REAL_T, LHS, RHS> operator+(const ExpressionBase<REAL_T, LHS>& a,
-    const ExpressionBase<REAL_T, RHS>& b) {
+            const ExpressionBase<REAL_T, RHS>& b) {
         return Add<REAL_T, LHS, RHS > (a.Cast(), b.Cast());
     }
 
@@ -111,8 +105,8 @@ namespace et4ad {
             return lhs_m.Derivative(id);
         }
 
-        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-            lhs_m.PushIds(storage);
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return lhs_m.ComplexStepValue(id, h) + std::complex<REAL_T>(rhs_m);
         }
 
         inline void PushIds(et4ad::IDSet & ids) const {
@@ -125,9 +119,7 @@ namespace et4ad {
             storage.push_back(Statement<REAL_T > (PLUS));
         }
 
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            lhs_m.PushAll(storage);
-        }
+
 
         const LHS& lhs_m;
         const REAL_T& rhs_m;
@@ -142,7 +134,7 @@ namespace et4ad {
      */
     template <class LHS, class REAL_T>
     inline const AddConstant<REAL_T, LHS> operator+(const ExpressionBase<REAL_T, LHS>& lhs,
-    const REAL_T& rhs) {
+            const REAL_T& rhs) {
         return AddConstant<REAL_T, LHS > (lhs.Cast(), rhs);
     }
 
@@ -175,8 +167,8 @@ namespace et4ad {
             return rhs_m.Derivative(id);
         }
 
-        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-            rhs_m.PushIds(storage);
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return std::complex<REAL_T>(lhs_m) + rhs_m.ComplexStepValue(id, h);
         }
 
         inline void PushIds(et4ad::IDSet & ids) const {
@@ -188,11 +180,6 @@ namespace et4ad {
             rhs_m.PushStatements(storage);
             storage.push_back(Statement<REAL_T > (PLUS));
         }
-
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            rhs_m.PushAll(storage);
-        }
-
 
 
 
@@ -209,7 +196,7 @@ namespace et4ad {
      */
     template <class REAL_T, class RHS >
     inline const ConstantAdd< REAL_T, RHS > operator+(const REAL_T& lhs,
-    const ExpressionBase<REAL_T, RHS> &rhs) {
+            const ExpressionBase<REAL_T, RHS> &rhs) {
         return ConstantAdd<REAL_T, RHS > (lhs, rhs.Cast());
     }
 

@@ -62,7 +62,7 @@ namespace std {
      */
     template<class REAL_T, class A>
     inline std::ostream& operator<<(std::ostream &out, const et4ad::ExpressionBase<REAL_T, A> &exp) {
-        out <<exp.GetId()<<" "<< exp.GetValue();
+        out << exp.GetValue();
         return out;
     }
 

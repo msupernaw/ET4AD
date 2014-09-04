@@ -8,11 +8,9 @@
 #ifndef EXPRESSION_HPP
 #define	EXPRESSION_HPP
 #include <stdint.h>
-
-#include "VariableStorage.hpp"
-//#include "BigFloat.hpp"
-#include "IDSet.hpp"
-
+#include <complex>
+#include "IDset.hpp"
+#include "Statement.hpp"
 
 namespace et4ad {
 
@@ -81,14 +79,25 @@ namespace et4ad {
             return Cast().Derivative(id);
         }
 
-        //        /**
-        //         * Push the ids for independent variables to a storage object.
-        //         * 
-        //         * @param storage
-        //         */
-        //        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-        //            Cast().PushIds(storage);
-        //        }
+        /**
+         * Complex Step value. Used for complex step derivative computations.
+         * Complex step differentiation is a technique that employs complex 
+         * arithmetic to obtain the numerical value of the first derivative of 
+         * a real valued analytic function of a real variable, avoiding the 
+         * loss of precision inherent in traditional finite differences.
+         * 
+         * For Example:
+         * 
+         * F(x+ih) = cos(x+ih)
+         * dF/dx+ih = F(x+ih).imag()/h
+         * 
+         * @param id
+         * @param h
+         * @return 
+         */
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return Cast().ComplexStepValue(id, h);
+        }
 
         /**
          * Push the ids for independent variables to a storage object.
@@ -103,16 +112,6 @@ namespace et4ad {
             Cast().PushStatements(storage);
         }
 
-        /**
-         *  Push all elements (derivatives, ids, statements) 
-         * to a storage object.
-         * 
-         * @param storage
-         */
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            Cast().PushAll(storage);
-        }
-
 
         //
         //
@@ -124,8 +123,108 @@ namespace et4ad {
             return *this;
         }
     };
-}
 
+    template<class REAL_T, class T, class TT>
+    inline const int operator==(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
+        return lhs.GetValue() == rhs.GetValue();
+    }
+
+    template<class REAL_T, class T, class TT>
+    inline const int operator!=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
+        return lhs.GetValue() != rhs.GetValue();
+    }
+
+    template<class REAL_T, class T, class TT>
+    inline const int operator<(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
+        return lhs.GetValue() < rhs.GetValue();
+    }
+
+    template<class REAL_T, class T, class TT>
+    inline const int operator>(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
+        return lhs.GetValue() > rhs.GetValue();
+    }
+
+    template<class REAL_T, class T, class TT>
+    inline const int operator<=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
+        return lhs.GetValue() <= rhs.GetValue();
+    }
+
+    template<class REAL_T, class T, class TT>
+    inline const int operator>=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
+        return lhs.GetValue() >= rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator==(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        return lhs == rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator!=(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        return lhs != rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator<(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        return lhs < rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator>(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        return lhs > rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator<=(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        return lhs <= rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator>=(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        return lhs >= rhs.GetValue();
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator==(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
+        return lhs.GetValue() == rhs;
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator!=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
+        return lhs.GetValue() != rhs;
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator<(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
+        return lhs.GetValue() <= rhs;
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator>(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
+        return lhs.GetValue() > rhs;
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator<=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
+        return lhs.GetValue() <= rhs;
+    }
+
+    template<class REAL_T, class T>
+    inline const int operator>=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
+        return lhs.GetValue() >= rhs;
+    }
+}
+namespace std{
+    template<class T,class A>
+    bool isfinite(et4ad::ExpressionBase<T,A>& v){
+        return false;
+    }
+    
+    template<class T,class A>
+    bool isinf(et4ad::ExpressionBase<T,A>& v){
+        return false;
+    }
+}
 
 #endif	/* EXPRESSION_HPP */
 

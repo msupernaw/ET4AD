@@ -35,7 +35,7 @@ namespace std {
      */
     template<class REAL_T, class EXPR>
     inline const et4ad::Sin<REAL_T, EXPR> sin(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
-    
+
 }
 
 namespace et4ad {
@@ -79,9 +79,9 @@ namespace et4ad {
             return expr_m.Derivative(id) * std::cos(expr_m.GetValue());
         }
 
-        //        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-        //            expr_m.PushIds(storage);
-        //        }
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return std::sin(expr_m.ComplexStep(id, h));
+        }
 
         inline void PushIds(et4ad::IDSet &ids) const {
             expr_m.PushIds(ids);
@@ -91,10 +91,6 @@ namespace et4ad {
             expr_m.PushStatements(storage);
             storage.push_back(Statement<REAL_T > (SIN));
         }
-
-        //        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-        //            expr_m.PushAll(storage);
-        //        }
 
 
 

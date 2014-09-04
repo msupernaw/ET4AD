@@ -48,9 +48,6 @@ namespace et4ad {
             return static_cast<REAL_T> (0.0);
         }
 
-        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-        }
-
         inline void PushIds(et4ad::IDSet &ids) const {
         }
 
@@ -58,7 +55,8 @@ namespace et4ad {
             storage.push_back(Statement<REAL_T > (CONSTANT, this->value_m));
         }
 
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return std::complex<REAL_T>(GetValue());
         }
 
 

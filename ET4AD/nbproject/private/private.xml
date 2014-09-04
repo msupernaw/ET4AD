@@ -7,12 +7,39 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/ACos.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Subtract.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Log10.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Log.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Exp.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Expression.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/FunctionMinimizer.hpp</file>
             <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Variable.hpp</file>
-            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Stack.hpp</file>
-            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Cos.hpp</file>
-            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Sin.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/ATan2.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/STD.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Sinh.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Sqrt.hpp</file>
             <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/main.cpp</file>
             <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Multiply.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Fabs.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Ceil.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Pow.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Tanh.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/ET4AD.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Sin.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/IDSet.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Constant.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Console.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Cosh.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/ASin.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/BasicVariable.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Tan.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Floor.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Add.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Divide.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/MFExp.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/Cos.hpp</file>
+            <file>file:/Users/matthewsupernaw/NetBeansProjects/ET4AD/ET4AD/ATan.hpp</file>
         </group>
     </open-files>
 </project-private>

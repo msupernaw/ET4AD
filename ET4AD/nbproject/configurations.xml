@@ -210,7 +210,7 @@
         </cTool>
         <ccTool>
           <developmentMode>0</developmentMode>
-          <commandLine>-O4 -std=c++11 -stdlib=libc++</commandLine>
+          <commandLine>-fvectorize -O4 -std=c++11 -stdlib=libc++</commandLine>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>

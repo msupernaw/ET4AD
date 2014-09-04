@@ -81,6 +81,10 @@ namespace et4ad {
             //            }
         }
 
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return std::log(expr_m.ComplexStepValue(id, h));
+        }
+
         inline void PushIds(et4ad::IDSet &ids) const {
             expr_m.PushIds(ids);
         }
@@ -90,9 +94,7 @@ namespace et4ad {
             storage.push_back(Statement<REAL_T > (LOG));
         }
 
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            expr_m.PushAll(storage);
-        }
+
 
 
     private:

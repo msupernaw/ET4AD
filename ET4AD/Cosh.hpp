@@ -75,8 +75,8 @@ namespace et4ad {
             return expr_m.Derivative(id) * std::sinh(value_m);
         }
 
-        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-            expr_m.PushIds(storage);
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return std::cosh(expr_m.ComplexStep(id, h));
         }
 
         inline void PushIds(et4ad::IDSet &ids) const {
@@ -86,10 +86,6 @@ namespace et4ad {
         inline void PushStatements(std::vector<Statement<REAL_T> > &storage) const {
             expr_m.PushStatements(storage);
             storage.push_back(Statement<REAL_T > (COSH));
-        }
-
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            expr_m.PushAll(storage);
         }
 
     private:

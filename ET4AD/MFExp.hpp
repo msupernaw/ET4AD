@@ -27,7 +27,7 @@ namespace et4ad {
      * @param expr
      */
     template <class REAL_T, class EXPR>
-    class MFExp; 
+    class MFExp;
 }
 
 namespace std {
@@ -82,16 +82,25 @@ namespace et4ad {
             }
         }
 
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            std::complex<REAL_T> value = expr_m.ComplexStepValue(id, h);
+            std::complex<REAL_T> b(60);
+            if (value <= b && value >= std::complex<REAL_T>(-1) * b) {
+                return std::exp(value);
+            } else if (value > b) {
+                return /*std::exp(b)*/std::complex<REAL_T>(EXP_OF_B) * (std::complex<REAL_T>(1.) + std::complex<REAL_T>(2.) * (value - b)) / (std::complex<REAL_T>(1.) + value - b);
+            } else {
+                return std::exp(std::complex<REAL_T>(-1) * b)*(std::complex<REAL_T>(1.) - value - b) / (std::complex<REAL_T>(1.) + std::complex<REAL_T>(2.) * (std::complex<REAL_T>(-1) * value - b));
+            }
+            //            this->id_m == id ? return std::complex<REAL_T>(GetValue(), h) : std::complex<REAL_T>(GetValue());
+        }
+
         inline const REAL_T Derivative(const uint32_t id, bool &found) const {
             return expr_m.Derivative(id, found) * this->GetValue();
         }
 
         inline const REAL_T Derivative(const uint32_t &id) const {
             return expr_m.Derivative(id) * value_m;
-        }
-
-        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
-            expr_m.PushIds(storage);
         }
 
         inline void PushIds(et4ad::IDSet &ids) const {
@@ -103,9 +112,6 @@ namespace et4ad {
             storage.push_back(Statement<REAL_T > (MFEXP));
         }
 
-        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-            expr_m.PushAll(storage);
-        }
 
 
 

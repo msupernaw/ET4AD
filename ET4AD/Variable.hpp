@@ -13,6 +13,8 @@
 //#include "Expression.hpp"
 #include "STD.hpp"
 
+#define H_V .00000000000001
+#define USE_COMPLEX_STEP
 
 namespace et4ad {
 
@@ -114,7 +116,7 @@ namespace et4ad {
         is_independent_m(false),
         independent_id_m(0),
         bounded_m(false) {
-           // SetAsIndependent(independent);
+            // SetAsIndependent(independent);
         }
 
         Variable(const Variable<REAL_T> & orig) {
@@ -139,7 +141,12 @@ namespace et4ad {
                 size_t size = ids_set.Size();
 
                 for (int i = 0; i < size; i++) {
+                    //                    
+#ifdef USE_COMPLEX_STEP
+                    gradient[ids[i]] = orig.ComplexStepValue(ids[i], H_V).imag() / H_V;
+#else
                     gradient[ids[i]] = orig.Derivative(ids[i]);
+#endif
                 }
                 //                IDSet::id_iterator it;
                 //                for (it = ids_set.begin(); it != ids_set.end(); it++) {
@@ -147,11 +154,11 @@ namespace et4ad {
                 //                    //                    gradient[(*it)].first = 1;
                 //                    gradient[(*it)] = orig.Derivative((*it));
                 //                }
-
-
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    orig.PushStatements(statements);
-                }
+                //
+                //
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    orig.PushStatements(statements);
+                //                }
             }
             SetValue(orig.GetValue());
         }
@@ -220,17 +227,23 @@ namespace et4ad {
                 int i;
                 for (i = 0; i < size; i++) {
 
+                    //                    gradient[ids[i]] = expr.Derivative(ids[i]);
+                    //                    gradient[ids[i]] = expr.ComplexStepValue(ids[i], H_V).imag() / H_V;
+#ifdef USE_COMPLEX_STEP
+                    gradient[ids[i]] = expr.ComplexStepValue(ids[i], H_V).imag() / H_V;
+#else
                     gradient[ids[i]] = expr.Derivative(ids[i]);
+#endif
                 }
 
                 //IDSet::id_iterator it;
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
                 //                    gradient[(*it)] = expr.Derivative((*it));
                 //                }
-
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    expr.PushStatements(statements);
-                }
+                //
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    expr.PushStatements(statements);
+                //                }
 
             }
 
@@ -241,13 +254,13 @@ namespace et4ad {
 
         }
 
-//        operator REAL_T() {
-//            return this->GetValue();
-//        }
-//
-//        operator REAL_T()const {
-//            return this->GetValue();
-//        }
+        //        operator REAL_T() {
+        //            return this->GetValue();
+        //        }
+        //
+        //        operator REAL_T()const {
+        //            return this->GetValue();
+        //        }
 
 
         //operators
@@ -260,9 +273,9 @@ namespace et4ad {
             //            t¬…≥÷his->ids_set.clear();
             if (Variable<REAL_T, group>::is_recording_g) {
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    statements.clear();
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    statements.clear();
+                //                }
 
             }
             return *this;
@@ -286,20 +299,25 @@ namespace et4ad {
                 size_t size = ids_set.Size();
                 int i;
                 for (i = 0; i < size; i++) {
+                    //                    gradient[ids[i]] = other.Derivative(ids[i]);
+#ifdef USE_COMPLEX_STEP
+                    gradient[ids[i]] = other.ComplexStepValue(ids[i], H_V).imag() / H_V;
+#else
                     gradient[ids[i]] = other.Derivative(ids[i]);
+#endif
                 }
 
                 //                for (it = ids_set.begin(); it != ids_set.end(); it++) {
                 //                    gradient[(*it)] = other.Derivative((*it));
                 //                }
 
-
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    other.PushStatements(s);
-                    statements.clear();
-                    statements.insert(statements.begin(), s.begin(), s.end());
-                }
+                //
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    other.PushStatements(s);
+                //                    statements.clear();
+                //                    statements.insert(statements.begin(), s.begin(), s.end());
+                //                }
 
             }
 
@@ -328,18 +346,24 @@ namespace et4ad {
 
                 int i;
                 for (i = 0; i < size; i++) {
+                    //                    gradient[ids[i]] = expr.Derivative(ids[i]);
+#ifdef USE_COMPLEX_STEP
+                    gradient[ids[i]] = expr.ComplexStepValue(ids[i], H_V).imag() / H_V;
+#else
                     gradient[ids[i]] = expr.Derivative(ids[i]);
+#endif
+
                 }
                 //                for (it = ids_set.begin(); it != ids_set.end(); it++) {
                 //                    gradient[(*it)] = expr.Derivative((*it));
                 //                }
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    expr.PushStatements(s);
-                    statements.clear();
-                    statements.insert(statements.begin(), s.begin(), s.end());
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    expr.PushStatements(s);
+                //                    statements.clear();
+                //                    statements.insert(statements.begin(), s.begin(), s.end());
+                //                }
             }
 
             SetValue(expr.GetValue());
@@ -387,21 +411,27 @@ namespace et4ad {
                 int ind;
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
+                    //                    gradient[ind] += rhs.Derivative(ind);
+#ifdef USE_COMLEX_STEP
+                    gradient[ind] += rhs.ComplexStepValue(ind, H_V).imag() / H_V;
+#else
                     gradient[ind] += rhs.Derivative(ind);
+#endif
+
                 }
                 //                for (it = ids_set.begin(); it != ite; ++it) {
                 //                    gradient[(*it)] += rhs.Derivative((*it));
                 //                }
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    ReadStatements(rhs);
-                    //                    std::vector<Statement<REAL_T> > s;
-                    //                    PushStatements(s);
-                    //                    rhs.PushStatements(s);
-                    //                    s.push_back(Statement<REAL_T > (PLUS));
-                    //                    statements.clear();
-                    //                    statements.insert(statements.begin(), s.begin(), s.end());
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    ReadStatements(rhs);
+                //                    //                    std::vector<Statement<REAL_T> > s;
+                //                    //                    PushStatements(s);
+                //                    //                    rhs.PushStatements(s);
+                //                    //                    s.push_back(Statement<REAL_T > (PLUS));
+                //                    //                    statements.clear();
+                //                    //                    statements.insert(statements.begin(), s.begin(), s.end());
+                //                }
 
             }
 
@@ -424,21 +454,26 @@ namespace et4ad {
                 int ind;
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
+                    //                    gradient[ind] += rhs.Derivative(ind);
+#ifdef USE_COMLEX_STEP
+                    gradient[ind] += rhs.ComplexStepValue(ind, H_V).imag() / H_V;
+#else
                     gradient[ind] += rhs.Derivative(ind);
+#endif
                 }
                 //                for (it = ids_set.begin(); it != ite; ++it) {
                 //
                 //                    gradient[(*it)] += rhs.Derivative((*it));
                 //                }
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (PLUS));
-                    statements.clear();
-                    statements.insert(statements.begin(), s.begin(), s.end());
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (PLUS));
+                //                    statements.clear();
+                //                    statements.insert(statements.begin(), s.begin(), s.end());
+                //                }
 
             }
             SetValue(value_m + rhs.GetValue());
@@ -463,7 +498,12 @@ namespace et4ad {
                 int ind;
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
+                    //                    gradient[ind] -= rhs.Derivative(ind);
+#ifdef USE_COMLEX_STEP
+                    gradient[ind] -= rhs.ComplexStepValue(ind, H_V).imag() / H_V;
+#else
                     gradient[ind] -= rhs.Derivative(ind);
+#endif
                 }
 
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
@@ -472,15 +512,15 @@ namespace et4ad {
                 //                    gradient[(*it)] = dx;
                 //                }
 
-
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (MINUS));
-                    statements.clear();
-                    statements.insert(statements.begin(), s.begin(), s.end());
-                }
+                //
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (MINUS));
+                //                    statements.clear();
+                //                    statements.insert(statements.begin(), s.begin(), s.end());
+                //                }
 
             }
             SetValue(GetValue() - rhs.GetValue());
@@ -499,20 +539,26 @@ namespace et4ad {
                 int ind;
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
+                    //                    gradient[ind] -= rhs.Derivative(ind);
+#ifdef USE_COMPLEX_STEP
+                    gradient[ind] -= rhs.ComplexStepValue(ind, H_V).imag() / H_V;
+#else
                     gradient[ind] -= rhs.Derivative(ind);
+#endif
+
                 }
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
                 //                    gradient[(*it)] -= rhs.Derivative((*it));
                 //                }
-
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (MINUS));
-                    statements.clear();
-                    statements.insert(statements.begin(), s.begin(), s.end());
-                }
+                //
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (MINUS));
+                //                    statements.clear();
+                //                    statements.insert(statements.begin(), s.begin(), s.end());
+                //                }
 
             }
             SetValue(GetValue() - rhs.GetValue());
@@ -535,20 +581,25 @@ namespace et4ad {
                 int i;
                 for (i = 0; i < size; i++) {
                     REAL_T& dx = gradient[ids[i]];
+                    //                    dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ids[i]));
+#ifdef USE_COMPLEX_STEP
+                    dx = (dx * rhs.GetValue() + GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V);
+#else
                     dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ids[i]));
+#endif
                 }
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
                 //                    gradient[(*it)] = gradient[(*it)] * rhs.GetValue() + GetValue() * rhs.Derivative(*it);
                 //                }
 
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (MULTIPLY));
-                    statements = s;
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (MULTIPLY));
+                //                    statements = s;
+                //                }
 
             }
             SetValue(GetValue() * rhs.GetValue());
@@ -569,20 +620,25 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
                     REAL_T& dx = gradient[ind];
+                    //                    dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ind));
+#ifdef USE_COMPLEX_STEP
+                    dx = (dx * rhs.GetValue() + GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V);
+#else
                     dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ind));
+#endif
                 }
 
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
                 //                    gradient[(*it)] = gradient[(*it)] * rhs.GetValue() + GetValue() * rhs.Derivative(*it);
                 //                }
-
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (MULTIPLY));
-                    statements = s;
-                }
+                //
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (MULTIPLY));
+                //                    statements = s;
+                //                }
 
             }
 
@@ -609,7 +665,13 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
                     REAL_T& dx = gradient[ind];
+                    //                    dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ind)) / (rhs.GetValue() * rhs.GetValue());
+#ifdef USE_COMPLEX_STEP
+                    dx = (dx * rhs.GetValue() - GetValue() * rhs.ComplexStepValue(ind, H_V).imag() / H_V) / (rhs.GetValue() * rhs.GetValue());
+#else
                     dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ind)) / (rhs.GetValue() * rhs.GetValue());
+#endif
+
                 }
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
                 //
@@ -619,13 +681,13 @@ namespace et4ad {
                 //                }
 
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (DIVIDE));
-                    statements = s;
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (DIVIDE));
+                //                    statements = s;
+                //                }
 
             }
             SetValue(GetValue() / rhs.GetValue());
@@ -643,7 +705,13 @@ namespace et4ad {
                 int i;
                 for (i = 0; i < size; i++) {
                     REAL_T& dx = gradient[ids[i]];
-                    dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ids[i])) / (rhs.GetValue() * rhs.GetValue());
+                    //                    dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ids[i])) / (rhs.GetValue() * rhs.GetValue());
+#ifdef USE_COMPLEX_STEP
+                    dx = (dx * rhs.GetValue() - GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V) / (rhs.GetValue() * rhs.GetValue());
+#else
+                    dx = (dx * rhs.GetValue() - GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V) / (rhs.GetValue() * rhs.GetValue());
+#endif
+
                 }
 
                 //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
@@ -653,13 +721,13 @@ namespace et4ad {
                 //                    gradient[(*it)] = (gradient[(*it)] * rhs.GetValue() - GetValue() * rhs.Derivative(*it)) / (rhs.GetValue() * rhs.GetValue());
                 //                }
 
-                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
-                    std::vector<Statement<REAL_T> > s;
-                    PushStatements(s);
-                    rhs.PushStatements(s);
-                    s.push_back(Statement<REAL_T > (DIVIDE));
-                    statements = s;
-                }
+                //                if (Variable<REAL_T, group>::is_supporting_arbitrary_order) {
+                //                    std::vector<Statement<REAL_T> > s;
+                //                    PushStatements(s);
+                //                    rhs.PushStatements(s);
+                //                    s.push_back(Statement<REAL_T > (DIVIDE));
+                //                    statements = s;
+                //                }
 
             }
             SetValue(GetValue() / rhs.GetValue());
@@ -672,6 +740,9 @@ namespace et4ad {
         }
 
         const REAL_T WRT(const Variable<REAL_T> &x) {
+            if (x.GetId() != 0 && x.GetId() == this->id_m) {
+                return REAL_T(1.0);
+            }
             return x.GetId() < gsize ? gradient[x.GetId()] : REAL_T(0.0);
             //            if (x.GetId() < gsize) {
             //                return gradient[x.GetId()];
@@ -686,6 +757,9 @@ namespace et4ad {
         }
 
         const REAL_T WRT(const Variable<REAL_T> &x) const {
+            if (x.GetId() != 0 && x.GetId() == this->id_m) {
+                return REAL_T(1.0);
+            }
             return x.GetId() < gsize ? gradient[x.GetId()] : REAL_T(0.0);
             //            if (x.GetId() < gsize) {
             //                return gradient[x.GetId()];
@@ -1444,7 +1518,7 @@ namespace et4ad {
             if (!is_independent_m && is_independent && independent_id_m == 0) {
                 independent_id_m = IndependentVariableIdGenerator::instance()->next();
                 this->id_m = independent_id_m;
-                idt.SetId(value_m,this->id_m);
+                idt.SetId(value_m, this->id_m);
                 is_independent_m = true;
             } else if (is_independent_m && !is_independent && independent_id_m != 0) {
                 this->id_m = 0;
@@ -1535,6 +1609,10 @@ namespace et4ad {
                     static_cast<REAL_T> ((unsigned(id) == unsigned(this->id_m)));
         }
 
+        inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
+            return this->id_m == id ? std::complex<REAL_T>(GetValue(), h) : std::complex<REAL_T>(GetValue());
+        }
+
         inline void PushIds(et4ad::IDSet & ids) const {
             if (!unsigned(this->id_m)) {
                 //                IDSet::id_iterator it;
@@ -1561,7 +1639,7 @@ namespace et4ad {
 
         }
 
-        size_t Size()const{
+        size_t Size()const {
             return this->gradient.size();
         }
 
@@ -1575,8 +1653,8 @@ namespace et4ad {
             t.is_independent_m = true;
         }
     };
-    
-     template<>
+
+    template<>
     struct IDTrait<et4ad::Variable<et4ad::Variable<double> > > {
 
         void SetId(et4ad::Variable<et4ad::Variable<double> >& t, uint32_t id) {
@@ -1590,96 +1668,6 @@ namespace et4ad {
 
     template <class REAL_T, int group>
     bool Variable<REAL_T, group>::is_supporting_arbitrary_order = false;
-
-    template<class REAL_T, class T, class TT>
-    inline const int operator==(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
-        return lhs.GetValue() == rhs.GetValue();
-    }
-
-    template<class REAL_T, class T, class TT>
-    inline const int operator!=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
-        return lhs.GetValue() != rhs.GetValue();
-    }
-
-    template<class REAL_T, class T, class TT>
-    inline const int operator<(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
-        return lhs.GetValue() < rhs.GetValue();
-    }
-
-    template<class REAL_T, class T, class TT>
-    inline const int operator>(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
-        return lhs.GetValue() > rhs.GetValue();
-    }
-
-    template<class REAL_T, class T, class TT>
-    inline const int operator<=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
-        return lhs.GetValue() <= rhs.GetValue();
-    }
-
-    template<class REAL_T, class T, class TT>
-    inline const int operator>=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const et4ad::ExpressionBase<REAL_T, TT>& rhs) {
-        return lhs.GetValue() >= rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator==(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
-        return lhs == rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator!=(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
-        return lhs != rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator<(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
-        return lhs < rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator>(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
-        return lhs > rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator<=(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
-        return lhs <= rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator>=(const REAL_T &lhs, const et4ad::ExpressionBase<REAL_T, T>& rhs) {
-        return lhs >= rhs.GetValue();
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator==(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
-        return lhs.GetValue() == rhs;
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator!=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
-        return lhs.GetValue() != rhs;
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator<(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
-        return lhs.GetValue() <= rhs;
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator>(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
-        return lhs.GetValue() > rhs;
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator<=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
-        return lhs.GetValue() <= rhs;
-    }
-
-    template<class REAL_T, class T>
-    inline const int operator>=(const et4ad::ExpressionBase<REAL_T, T>& lhs, const REAL_T &rhs) {
-        return lhs.GetValue() >= rhs;
-    }
 
     /**
      * A wrapper class for Variables. Provides synchronized access for situations
