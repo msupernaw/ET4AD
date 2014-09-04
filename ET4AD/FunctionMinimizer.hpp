@@ -409,17 +409,6 @@ namespace et4ad {
             return this->converged_m;
         }
 
-        
-        /**
-         * Clones the current model. Used for concurrent hessian and hessian 
-         * estimates.
-         * @return 
-         */
-        FunctionMinimizer<T>* Clone(){
-            std::cout<<__func__ <<"not yet implemented!";
-            return NULL;
-        }
-        
         /**
          * Starts the minimizer. Initializes runtime members and handles 
          * phasing. Also, makes sure that bounded parameters are properly 
@@ -556,8 +545,6 @@ namespace et4ad {
          */
         virtual void Gradient(const variable &fx, const std::vector<variable* > &parameters, std::valarray<T> &gradient) {
 
-            
-            
             //            fx.Gradient(parameters,gradient);
             for (int i = 0; i < parameters.size(); i++) {
                 // std::cout<<"Gradient i = "<<i<<std::endl;
@@ -606,8 +593,6 @@ namespace et4ad {
             }
             return hessian;
         }
-        
-        public:
 
         const std::valarray<std::valarray<T> > EstimatedHessian() {
             variable::SetRecording(true);
@@ -626,7 +611,7 @@ namespace et4ad {
             variable f;
 
 
-            for (uint32_t i = 0; i<this->active_parameters_m.size(); i++) {
+            for (int i = 0; i<this->active_parameters_m.size(); i++) {
 
                 if (this->verbose_m) {
                     std::cout << "Estimating Hessian row " << i << " of " << active_parameters_m.size() << "\n" << std::flush;
@@ -639,8 +624,8 @@ namespace et4ad {
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g1);
 
-                for (int j = 0; j < this->active_parameters_m.size(); j++) {
-                    g1[j] = f.WRT(*active_parameters_m[j]);
+                for (int i = 0; i < this->active_parameters_m.size(); i++) {
+                    g1[i] = f.WRT(*active_parameters_m[i]);
                 }
 
 
@@ -650,8 +635,8 @@ namespace et4ad {
                 active_parameters_m[i]->SetValue(xsave + sdelta2);
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g2);
-                for (int j = 0; j < this->active_parameters_m.size(); j++) {
-                    g2[j] = f.WRT(*active_parameters_m[j]);
+                for (int i = 0; i < this->active_parameters_m.size(); i++) {
+                    g2[i] = f.WRT(*active_parameters_m[i]);
                 }
 
                 active_parameters_m[i]->SetValue(xsave);
@@ -665,10 +650,9 @@ namespace et4ad {
                 f = 0.0;
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g1);
-                for (int j = 0; j < this->active_parameters_m.size(); j++) {
-                    g1[j] = f.WRT(*active_parameters_m[j]);
+                for (int i = 0; i < this->active_parameters_m.size(); i++) {
+                    g1[i] = f.WRT(*active_parameters_m[i]);
                 }
-
 
 
 
@@ -679,10 +663,9 @@ namespace et4ad {
                 f = 0.0;
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g2);
-                for (int j = 0; j < this->active_parameters_m.size(); j++) {
-                    g2[j] = f.WRT(*active_parameters_m[j]);
+                for (int i = 0; i < this->active_parameters_m.size(); i++) {
+                    g2[i] = f.WRT(*active_parameters_m[i]);
                 }
-
 
                 active_parameters_m[i]->SetValue(xsave);
 
@@ -720,7 +703,81 @@ namespace et4ad {
 
     private:
 
-        
+        /**
+         * Finite differences for second derivative.
+         */
+        const T EstimateHessianElement(variable &f, size_t row, size_t column) {
+            T h = T(0.0001);
+            T hh = T(1.0) / h;
+            size_t n = active_parameters_m.size();
+            T ff;
+
+
+
+            //            variable f;
+
+            std::vector<T> xp2h(n);
+            std::vector<T> xph(n);
+            std::vector<T> xm2h(n);
+            std::vector<T> xmh(n);
+
+            T fp2h;
+            T fph;
+            T fm2h;
+            T fmh;
+
+            //updaste parameters
+            for (size_t j = 0; j < n; j++) {
+                if (j != column) {
+
+
+                    xp2h[j] = active_parameters_m[j]->GetValue();
+                    xph[j] = active_parameters_m[j]->GetValue();
+                    xm2h[j] = active_parameters_m[j]->GetValue();
+                    xmh[j] = active_parameters_m[j]->GetValue();
+                } else {
+
+                    xp2h[j] = active_parameters_m[j]->GetValue() + T(2.0) * h;
+                    xph[j] = active_parameters_m[j]->GetValue() + h;
+                    xm2h[j] = active_parameters_m[j]->GetValue() - T(2.0) * h;
+                    xmh[j] = active_parameters_m[j]->GetValue() - h;
+                }
+            }
+
+            for (size_t i = 0; i < n; i++) {
+                active_parameters_m[i]->SetValue(xp2h[i]);
+            }
+            this->ObjectiveFunction(f); // dfdx(f, xp2h, xiref);
+            fp2h = f.WRT(*active_parameters_m[row]);
+
+            for (size_t i = 0; i < n; i++) {
+                active_parameters_m[i]->SetValue(xph[i]);
+            }
+            this->ObjectiveFunction(f); //dfdx(f, xph, xiref);
+            fph = f.WRT(*active_parameters_m[row]);
+
+            for (size_t i = 0; i < n; i++) {
+                active_parameters_m[i]->SetValue(xm2h[i]);
+            }
+            this->ObjectiveFunction(f); //dfdx(f, xm2h, xiref);
+
+            fm2h = f.WRT(*active_parameters_m[row]);
+            for (size_t i = 0; i < n; i++) {
+                active_parameters_m[i]->SetValue(xmh[i]);
+            }
+            this->ObjectiveFunction(f); //dfdx(f, xmh, xiref);
+            fmh = f.WRT(*active_parameters_m[row]);
+            //            std::cout<<"here...\n";
+
+            ff = (-1 * fp2h +
+                    8.0 * fph) -
+                    8.0 * fmh +
+                    fm2h / 12.0 * hh;
+
+
+            return ff;
+
+        }
 
         void CallGradient(variable &fx, std::vector<variable* > &parameters, std::valarray<T> &gradient) {
             this->gradient_calls_m++;
@@ -1344,8 +1401,6 @@ namespace et4ad {
 
                     this->CallObjectiveFunction(fx);
 
-                    
-                    
                     if (fx.GetValue() != fx.GetValue()) {
 //                        if (this->IsVerbose()) {
 //                            std::cout << "Error: signaling nan, unable to converge!\n";
@@ -1377,9 +1432,9 @@ namespace et4ad {
                             parameters[j]->SetValue(best[j]);
                         }
                         variable::SetRecording(true);
-                     
+
                         return false;
-                    
+                        return false;
                     }
 
                     //                                        if (this->verbose_m) {
@@ -1747,7 +1802,7 @@ namespace et4ad {
             std::cout << "Function Value = " << io::BOLD << ret
                     << std::endl << io::DEFAULT;
             std::cout.precision(prec);
-            std::cout << "Active Parameters: " << io::BOLD << parameters.size()<<" of "<<this->parameters_m.size()
+            std::cout << "Active Parameters: " << io::BOLD << parameters.size()
                     << io::DEFAULT << std::endl;
             //            std::cout << std::scientific;
             std::cout << "Tolerance: " << io::BOLD << this->GetTolerance() << io::DEFAULT
@@ -1769,13 +1824,13 @@ namespace et4ad {
                 if ((i & 30) == 0) {
                     std::cout << io::BOLD << "---------------------------------------------------------------------------------------------------------------\n|";
 
-                    std::cout << io::BOLD << center("Id", 10) << "| " << center("Parameter", 14) << " | "
+                    std::cout << io::BOLD << center("Id", 10) << "| " << center("Parameter", 19) << " | "
                             << center("Value", 10) << " | "
                             << center("Gradient", 10) << " | ";
                     //                    std::cout << center("Variable", 20) << " "
                     //                            << center("Value", 10) << " "
                     //                            << center("Gradient", 10) << " | ";
-                    std::cout << io::BOLD << center("Id", 10) << "|  " << center("Parameter", 14) << " | "
+                    std::cout << io::BOLD << center("Id", 10) << "|  " << center("Parameter", 19) << " | "
                             << center("Value", 10) << " | "
                             << center("Gradient", 10) << " |\n" << io::DEFAULT;
                     std::cout << io::BOLD << "---------------------------------------------------------------------------------------------------------------\n" << io::DEFAULT;
@@ -1787,7 +1842,7 @@ namespace et4ad {
                         std::stringstream sp;
                         sp << this->active_parameters_m[j]->GetId();
                         std::cout << left(sp.str(), 10) << " | "
-                                << left(this->active_parameters_m[j]->GetName(), 14) << " | "
+                                << left(this->active_parameters_m[j]->GetName(), 19) << " | "
                                 << prd(this->active_parameters_m[j]->GetValue(), 5, 10) << " | ";
 
                         if (std::fabs(gradient[j])<this->tolerance_m) {

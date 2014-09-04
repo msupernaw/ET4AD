@@ -1,93 +1,104 @@
 /* 
- * File:   BasicBasicVariable.hpp
+ * File:   BasicVariable.hpp
  * Author: matthewsupernaw
  *
  * Created on August 26, 2014, 9:00 AM
  */
 
-#ifndef BASICBasicVariable_HPP
-#define	BASICBasicVariable_HPP
+#ifndef BASICVariable_HPP
+#define	BASICVariable_HPP
 
 #include <stack>
 #include "IDGenerator.hpp"
 #include "STD.hpp"
 #include "AlignedAllocator.hpp"
 #include <boost/unordered_map.hpp>
-
 #include "GradientFile.hpp"
 
 
 namespace et4ad {
 
-    template<class REAL_T, size_t SIZE = 1000 >
+    template<class REAL_T, size_t SIZE = 10 >
     struct StackStorage {
         REAL_T data[SIZE];
     public:
-        
-        StackStorage(){
-            memset(data, 0, sizeof(data));
+
+        StackStorage() {
+            memset(data, 0, sizeof (data));
         }
 
         size_t Size() const {
             return SIZE;
         }
 
-        inline REAL_T & Get(const uint32_t& index) {
+        inline REAL_T & Get(const uint32_t & index) {
             return data[index];
         }
 
-        inline const REAL_T & Get(const uint32_t& index) const {
+        inline const REAL_T & Get(const uint32_t & index) const {
             return data[index];
         }
-        
-        void Reset(){
-             memset(data, 0, sizeof(data));
+
+        void Reset() {
+            memset(data, 0, sizeof (data));
         }
-        
+
+        void Prepare(const uint32_t & id) {
+
+        }
+
 
     };
 
-    template<class REAL_T, size_t SIZE = 1000 >
+    template<class REAL_T >
     struct DynamicStorage {
-        mutable std::vector<REAL_T, util::aligned_allocator<REAL_T, 16> > data;
-         REAL_T zero;
-         size_t gsize;
+        std::vector<REAL_T, util::aligned_allocator<REAL_T, 16 > > data;
+        REAL_T zero;
+        uint32_t gsize;
     public:
 
-        DynamicStorage() {
+        inline explicit DynamicStorage() {
             zero = 0;
-            data.resize(SIZE);
-            gsize = SIZE;
+            gsize = 0;
         }
 
-        size_t Size() const {
-            return SIZE;
+        inline size_t Size() const {
+            return gsize;
         }
 
-        inline REAL_T & Get(const uint32_t& index) {
-            if (data.size()<= index) {
-                data.resize(index+gsize);
-            }
+        inline REAL_T & Get(const uint32_t & index) {
+
             return data[index];
         }
 
-        inline const REAL_T & Get(const uint32_t& index) const {
-            if (data.size()<= index) {
-                data.resize(index+gsize);
-            }
+        inline const REAL_T & Get(const uint32_t & index) const {
+
             return data[index];
         }
-        
-        void Reset(){
-//            int size= data.size();
+
+        inline void Reset() {
             data.resize(0);
+            gsize = 0;
         }
+
+        /**
+         * If the max id needs to be known, 
+         * handle it here.
+         * @param id
+         */
+        inline void Prepare(const uint32_t & id) {
+            if (gsize < id) {
+                data.resize(id + 1);
+                gsize = data.size();
+            }
+        }
+
 
     };
 
     template<class REAL_T>
     struct MapStorage {
-        typedef boost::unordered_map<uint32_t, REAL_T>  Map;
+        typedef boost::unordered_map<uint32_t, REAL_T> Map;
         mutable Map data;
         typedef typename Map::iterator g_it;
     public:
@@ -107,11 +118,13 @@ namespace et4ad {
         inline const REAL_T & Get(uint32_t index) const {
             return data[index];
         }
-        void Reset(){
+
+        void Reset() {
             data.clear();
-//            for(g_it it = data.begin(); it != data.end(); it++){
-//                it->second = 0.0;
-//            }
+        }
+
+        void Prepare(const uint32_t & id) {
+
         }
 
     };
@@ -135,7 +148,7 @@ namespace et4ad {
             fdata = GradientFileInstance<REAL_T, group, SIZE > ();
             id = fdata->Next();
             last_index = 0;
-            last_g = 0; //fdata->Get(id, last_index);
+            last_g = 0;
             needs_write = true;
         }
 
@@ -152,19 +165,19 @@ namespace et4ad {
             return last_g;
         }
 
-        inline const REAL_T & Get(const uint32_t& index) const {  
-            
+        inline const REAL_T & Get(const uint32_t& index) const {
+
             fdata->Set(id, last_index, last_g);
-            temp = fdata->Get(id, index);           
+            temp = fdata->Get(id, index);
             return temp;
         }
 
-        void Reset(){
+        void Reset() {
             fdata->Reset(id);
-//            REAL_T z =0;
-//            for(int i =0; i < SIZE; i++){
-//                fdata->Set(id, i, z);
-//            }
+        }
+
+        void Prepare(const uint32_t& id) {
+
         }
 
 
@@ -173,15 +186,14 @@ namespace et4ad {
 
 
     template<class REAL_T, //base type
-    int group, //group identifier
-    class Storage = DiskStorage<REAL_T> > //storage policy
+    int group = 0, //group identifier
+    class Storage = DynamicStorage<REAL_T> > //storage policy
     class BasicVariable;
 
     template<class REAL_T, //base type
     int group, class Storage > //group identifier
     class BasicVariable : public ExpressionBase<REAL_T, BasicVariable<REAL_T, group, Storage > > {
         Storage gradient;
-        //        REAL_T gradient[5000];
         mutable IDSet ids_set;
         size_t gsize;
         REAL_T value_m;
@@ -200,7 +212,6 @@ namespace et4ad {
         static bool is_supporting_arbitrary_order;
         IDSet::id_iterator it;
         mutable std::vector<Statement<REAL_T> > statements;
-        //IDSet::id_iterator it;
 
 
 
@@ -233,11 +244,9 @@ namespace et4ad {
         is_independent_m(false),
         independent_id_m(0),
         bounded_m(false) {
-            //                        gradient.resize(500);
-            //                          gsize = 500;
         }
 
-        BasicVariable(const REAL_T &value, bool independent = false) : ExpressionBase<REAL_T, BasicVariable<REAL_T, group, Storage> >(),
+        BasicVariable(const REAL_T &value) : ExpressionBase<REAL_T, BasicVariable<REAL_T, group, Storage> >(),
         gsize(0),
         value_m(value),
         min_boundary_m(std::numeric_limits<REAL_T>::min()),
@@ -245,14 +254,7 @@ namespace et4ad {
         is_independent_m(false),
         independent_id_m(0),
         bounded_m(false) {
-            //                   gradient.resize(500);
-            //                   gsize = 500;
-            SetAsIndependent(independent);
         }
-
-        //        BasicVariable(BasicVariable<REAL_T, group, Storage> && orig) {
-        //            std::swap(*this, orig);
-        //        }
 
         BasicVariable(const BasicVariable<REAL_T, group, Storage> & orig) {
 
@@ -260,7 +262,6 @@ namespace et4ad {
             gsize = 0;
             bounded_m = orig.bounded_m;
             is_independent_m = orig.is_independent_m;
-            //            this->SetAsIndependent()
             independent_id_m = orig.independent_id_m;
             max_boundary_m = orig.max_boundary_m;
             min_boundary_m = orig.min_boundary_m;
@@ -271,11 +272,12 @@ namespace et4ad {
 
 
                 orig.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
                 for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = orig.Derivative(ids[i]);
+                    orig.Derivative(ids[i], gradient.Get(ids[i]));
                 }
 
 
@@ -301,21 +303,17 @@ namespace et4ad {
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
                 expr.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
                 for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = expr.Derivative(ids[i]);
+                    expr.Derivative(ids[i], gradient.Get(ids[i]));
                 }
 
 
-                //IDSet::id_iterator it;
-                //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
-                //                    gradient[(*it)] = expr.Derivative((*it));
-                //                }
-
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
-                    expr.PushStatements(statements);
+                    expr.template PushStatements<>(statements);
                 }
 
             }
@@ -327,13 +325,13 @@ namespace et4ad {
 
         }
 
-//        operator REAL_T() {
-//            return this->GetValue();
-//        }
-//
-//        operator REAL_T()const {
-//            return this->GetValue();
-//        }
+        operator REAL_T() {
+            return this->GetValue();
+        }
+
+        operator REAL_T()const {
+            return this->GetValue();
+        }
 
 
         //operators
@@ -341,11 +339,7 @@ namespace et4ad {
         BasicVariable& operator=(const REAL_T& other) {
             SetValue(other);
             gradient.Reset();
-            //            if (!independent_id_m)
-            //                gradient.resize(0);
-            //            ResizeGradientVector(ids_set.max+1);
 
-            //            t¬…≥÷his->ids_set.clear();
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
@@ -374,23 +368,18 @@ namespace et4ad {
 
 
                 other.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
                 for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = other.Derivative(ids[i]);
+                    other.Derivative(ids[i], gradient.Get(ids[i]));
                 }
-
-
-
-                //                for (it = ids_set.begin(); it != ids_set.end(); it++) {
-                //                    gradient[(*it)] = other.Derivative((*it));
-                //                }
 
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
-                    other.PushStatements(s);
+                    other.template PushStatements<>(s);
                     statements.clear();
                     statements.insert(statements.begin(), s.begin(), s.end());
                 }
@@ -416,17 +405,14 @@ namespace et4ad {
 
 
                 expr.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
                 for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = expr.Derivative(ids[i]);
+                    expr.Derivative(ids[i], gradient.Get(ids[i]));
                 }
 
-
-                //                for (it = ids_set.begin(); it != ids_set.end(); it++) {
-                //                    gradient[(*it)] = expr.Derivative((*it));
-                //                }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
@@ -445,7 +431,7 @@ namespace et4ad {
         void ReadStatements(const ExpressionBase<REAL_T, T>& rhs) {
             std::vector<Statement<REAL_T> > s;
             PushStatements(s);
-            rhs.PushStatements(s);
+            rhs.template PushStatements<REAL_T>(s);
             s.push_back(Statement<REAL_T > (PLUS));
             statements.clear();
             statements.insert(statements.begin(), s.begin(), s.end());
@@ -460,12 +446,19 @@ namespace et4ad {
 
 
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) += rhs.Derivative(ids[i]);
+                register int i;
+                register int ind;
+                REAL_T dx = 0;
+                for (i = 0; i < size; i++) {
+                    ind = ids[i];
+                    rhs.Derivative(ind, dx);
+                    gradient.Get(ind) += dx;
                 }
+
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     ReadStatements(rhs);
@@ -489,17 +482,24 @@ namespace et4ad {
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) += rhs.Derivative(ids[i]);
-                }
 
+
+                register int i;
+                register int ind;
+                REAL_T dx = 0;
+                for (i = 0; i < size; i++) {
+                    ind = ids[i];
+                    rhs.Derivative(ind, dx);
+                    gradient.Get(ind) += dx;
+                }
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<>(s);
                     s.push_back(Statement<REAL_T > (PLUS));
                     statements.clear();
                     statements.insert(statements.begin(), s.begin(), s.end());
@@ -519,17 +519,22 @@ namespace et4ad {
 
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) -= rhs.Derivative(ids[i]);
+
+                register int i;
+                register int ind;
+                for (i = 0; i < size; i++) {
+                    ind = ids[i];
+                    gradient.Get(ind) -= rhs.Derivative(ind);
                 }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<>(s);
                     s.push_back(Statement<REAL_T > (MINUS));
                     statements.clear();
                     statements.insert(statements.begin(), s.begin(), s.end());
@@ -544,17 +549,25 @@ namespace et4ad {
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) -= rhs.Derivative(ids[i]);
+
+
+                register int i;
+                register int ind;
+                REAL_T dx;
+                for (i = 0; i < size; i++) {
+                    ind = ids[i];
+                    rhs.Derivative(ind, dx);
+                    gradient.Get(ind) -= dx;
                 }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<>(s);
                     s.push_back(Statement<REAL_T > (MINUS));
                     statements.clear();
                     statements.insert(statements.begin(), s.begin(), s.end());
@@ -573,19 +586,26 @@ namespace et4ad {
 
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
-                REAL_T rhs_value = rhs.GetValue();
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = (gradient.Get(ids[i]) * rhs_value + GetValue() * rhs.Derivative(ids[i]));
+
+
+                register int i;
+                REAL_T rhs_value = rhs.GetValue();
+                REAL_T dx = 0;
+                for (i = 0; i < size; i++) {
+                    REAL_T& dx2 = gradient.Get(ids[i]);
+                    rhs.Derivative(ids[i], dx);
+                    dx2 = (dx2 * rhs_value + GetValue() * dx);
                 }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<>(s);
                     s.push_back(Statement<REAL_T > (MULTIPLY));
                     statements = s;
                 }
@@ -600,17 +620,27 @@ namespace et4ad {
                 REAL_T rhs_value = rhs.GetValue();
 
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = (gradient.Get(ids[i]) * rhs_value + GetValue() * rhs.Derivative(ids[i]));
+
+
+                register int i;
+                register int ind;
+                REAL_T dx = 0;
+
+                for (i = 0; i < size; i++) {
+                    ind = ids[i];
+                    rhs.Derivative(ind, dx);
+                    REAL_T& dx2 = gradient.Get(ind);
+                    dx2 = (dx2 * rhs_value + GetValue() * dx);
                 }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<>(s);
                     s.push_back(Statement<REAL_T > (MULTIPLY));
                     statements = s;
                 }
@@ -630,21 +660,27 @@ namespace et4ad {
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
 
-                REAL_T mult = 1.0 / (rhs.GetValue() * rhs.GetValue());
-                REAL_T rhs_value = rhs.GetValue();
-
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = (gradient.Get(ids[i]) * rhs_value - GetValue() * rhs.Derivative(ids[i])) * mult;
+
+
+                register int i;
+                register int ind;
+                REAL_T mult = 1.0 / (rhs.GetValue() * rhs.GetValue());
+                REAL_T rhs_value = rhs.GetValue();
+                for (i = 0; i < size; i++) {
+                    ind = ids[i];
+                    REAL_T& dx = gradient.Get(ind);
+                    dx = (dx * rhs_value - GetValue() * rhs.Derivative(ind)) * mult;
                 }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<REAL_T>(s);
                     s.push_back(Statement<REAL_T > (DIVIDE));
                     statements = s;
                 }
@@ -657,29 +693,27 @@ namespace et4ad {
         BasicVariable& operator/=(const BasicVariable& rhs) {
             if (BasicVariable<REAL_T, group, Storage>::is_recording_g) {
 
-                REAL_T mult = 1.0 / (rhs.GetValue() * rhs.GetValue());
-                REAL_T rhs_value = rhs.GetValue();
-
                 rhs.PushIds(ids_set);
+                gradient.Prepare(ids_set.max + 1);
 
                 uint32_t* ids = ids_set.Data();
                 size_t size = ids_set.Size();
-                for (int i = 0; i < size; i++) {
-                    gradient.Get(ids[i]) = (gradient.Get(ids[i]) * rhs_value - GetValue() * rhs.Derivative(ids[i])) * mult;
+
+                register int i;
+                REAL_T mult = 1.0 / (rhs.GetValue() * rhs.GetValue());
+                REAL_T rhs_value = rhs.GetValue();
+                REAL_T dx = 0;
+                for (i = 0; i < size; i++) {
+                    rhs.Derivative(ids[i], dx);
+                    REAL_T& dx2 = gradient.Get(ids[i]);
+                    dx2 = (dx2 * rhs_value - GetValue() * dx) * mult;
                 }
 
-
-                //                for (it = ids_set.begin(); it != ids_set.end(); ++it) {
-                //
-                //                    //                    REAL_T dx = (gradient[(*it)] * rhs.GetValue() - GetValue() * rhs.Derivative(*it)) / (rhs.GetValue() * rhs.GetValue());
-                //
-                //                    gradient[(*it)] = (gradient[(*it)] * rhs.GetValue() - GetValue() * rhs.Derivative(*it)) / (rhs.GetValue() * rhs.GetValue());
-                //                }
 
                 if (BasicVariable<REAL_T, group, Storage>::is_supporting_arbitrary_order) {
                     std::vector<Statement<REAL_T> > s;
                     PushStatements(s);
-                    rhs.PushStatements(s);
+                    rhs.template PushStatements<>(s);
                     s.push_back(Statement<REAL_T > (DIVIDE));
                     statements = s;
                 }
@@ -689,37 +723,15 @@ namespace et4ad {
         }
 
         BasicVariable& operator/=(const REAL_T& rhs) {
-            //            SetValue(GetValue() / rhs);
-            //            return *this;
             return *this = (*this / rhs);
         }
 
         const REAL_T WRT(const BasicVariable<REAL_T, group, Storage> &x) {
             return x.GetId() < gradient.Size() ? gradient.Get(x.GetId()) : 0.0;
-            //            if (x.GetId() < gsize) {
-            //                return gradient[x.GetId()];
-            //                //                if (gradient[x.GetId()].first) {
-            //                //                    return gradient[x.GetId()].second;
-            //                //                } else {
-            //                //                    return 0.0;
-            //                //                }
-            //            } else {
-            //                return 0.0;
-            //            }
         }
 
         const REAL_T WRT(const BasicVariable<REAL_T, group, Storage> &x) const {
             return x.GetId() < gradient.Size() ? gradient.Get(x.GetId()) : 0.0;
-            //            if (x.GetId() < gsize) {
-            //                return gradient[x.GetId()];
-            //                //                if (gradient[x.GetId()].first) {
-            //                //                    return gradient[x.GetId()].second;
-            //                //                } else {
-            //                //                    return 0.0;
-            //                //                }
-            //            } else {
-            //                return 0.0;
-            //            }
         }
 
         /**
@@ -758,7 +770,7 @@ namespace et4ad {
             v.reserve(statements.size());
             std::stack<std::pair<REAL_T, REAL_T >,
                     std::vector<std::pair<REAL_T, REAL_T > > > stack;
-            //            ad::Stack<std::pair<T, T> > stack;
+
             bool found = false;
             int size = statements.size();
             std::pair<REAL_T, REAL_T > lhs = std::pair<REAL_T, REAL_T > (0, 0);
@@ -1053,7 +1065,6 @@ namespace et4ad {
 
             }
 
-            //            std::cout << "returning " << stack.top().second << "\n\n";
             return stack.top().second;
         }
 
@@ -1078,7 +1089,6 @@ namespace et4ad {
             v.reserve(statements.size()*200);
             std::stack<VPair,
                     std::vector<VPair > > stack(v);
-            //                        et4ad::Stack<VPair > stack;
             bool found = false;
             int size = statements.size();
             VPair lhs = VPair(BasicVariable<REAL_T, group, Storage > (0), BasicVariable<REAL_T, group, Storage > (0));
@@ -1473,18 +1483,12 @@ namespace et4ad {
             if (!is_independent_m && is_independent && independent_id_m == 0) {
                 independent_id_m = IndependentVariableIdGenerator::instance()->next();
                 this->id_m = independent_id_m;
-                //                this->gradient.resize(2);
-                //                gradient[0] = 0.0;
-                //                gradient[1] = 1.0;
                 is_independent_m = true;
             } else if (is_independent_m && !is_independent && independent_id_m != 0) {
                 this->id_m = 0;
                 is_independent_m = false;
             } else {
                 this->id_m = independent_id_m;
-                //                this->gradient.resize(2);
-                //                gradient[0] = 0.0;
-                //                gradient[1] = 1.0;
                 is_independent_m = true;
             }
 
@@ -1538,29 +1542,21 @@ namespace et4ad {
 
         inline const REAL_T Derivative(const uint32_t id, bool &found) const {
 
-            //            if (id < gsize) {
-            //                if (gradient[id].first) {
-            //                    found = true;
-            //                    return gradient[id].second;
-            //                } else {
-            //                    return 0.0;
-            //                }
-            //            }
-            //
-            //            if (id_m) {
-            //                if (id_m == id) {
-            //                    found = true;
-            //                    return 1.0;
-            //                } else {
-            //                    return 0;
-            //                }
-            //            }
+            if (this->ids_set.Has(id)) {
+                found = true;
+            } else {
+                found = false;
+            }
+
+            return this->ids_set.Has(id) ?
+                    gradient.Get(unsigned(id)) :
+                    static_cast<REAL_T> ((unsigned(id) == unsigned(this->id_m)));
 
             return 0.0;
         }
 
         inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            dx = id < gradient.Size() ?
+            dx = (unsigned(gradient.Size()) > unsigned(id)) ?
                     gradient.Get(unsigned(id)) :
                     static_cast<REAL_T> ((unsigned(id) == unsigned(this->id_m)));
         }
@@ -1574,12 +1570,10 @@ namespace et4ad {
          * @return 
          */
         inline const REAL_T Derivative(const uint32_t& id) const {
-
-            if (static_cast<REAL_T> ((unsigned(id) == unsigned(this->id_m)))) {
-                return 1.0;
-            }
-
-            return gradient.Get(unsigned(id));
+   
+            return this->ids_set.Has(id) ?
+                    gradient.Get(unsigned(id)) :
+                    static_cast<REAL_T> ((unsigned(id) == unsigned(this->id_m)));
 
         }
 
@@ -1596,14 +1590,10 @@ namespace et4ad {
         inline void PushIds(et4ad::IDSet & ids) const {
             if (!unsigned(this->id_m)) {
 
-                //                IDSet::id_iterator it;
-                //                IDSet::id_iterator ite = ids_set.end();
                 const uint32_t* ids_m = ids_set.Data();
                 const size_t size = ids_set.Size();
                 int i;
-                //                for (it = ids_set.begin(); it != ite; ++it) {
                 for (i = 0; i < size; i++) {
-                    //                    ids.insert((*it));
                     ids.insert(ids_m[i]);
                 }
             } else {

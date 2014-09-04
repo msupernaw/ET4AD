@@ -10,9 +10,9 @@
 #include <stdint.h>
 
 #include "VariableStorage.hpp"
-#include "BigFloat.hpp"
+//#include "BigFloat.hpp"
 #include "IDSet.hpp"
-#include "Statement.hpp"
+
 
 namespace et4ad {
 
@@ -69,10 +69,6 @@ namespace et4ad {
             return Cast().Derivative(id, found);
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            Cast().Derivative(id, dx);
-        }
-
         /**
          * Compute or get the stored derivative with respect to the unique 
          * identifier id.
@@ -85,10 +81,6 @@ namespace et4ad {
             return Cast().Derivative(id);
         }
 
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            Cast().Derivative(gradient);
-        }
-
         //        /**
         //         * Push the ids for independent variables to a storage object.
         //         * 
@@ -97,10 +89,6 @@ namespace et4ad {
         //        inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
         //            Cast().PushIds(storage);
         //        }
-
-        inline size_t Size() const {
-            return Cast().Size();
-        }
 
         /**
          * Push the ids for independent variables to a storage object.
@@ -115,15 +103,15 @@ namespace et4ad {
             Cast().PushStatements(storage);
         }
 
-        //        /**
-        //         *  Push all elements (derivatives, ids, statements) 
-        //         * to a storage object.
-        //         * 
-        //         * @param storage
-        //         */
-        //        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
-        //            Cast().PushAll(storage);
-        //        }
+        /**
+         *  Push all elements (derivatives, ids, statements) 
+         * to a storage object.
+         * 
+         * @param storage
+         */
+        inline void PushAll(et4ad::VariableStorage<REAL_T> &storage) const {
+            Cast().PushAll(storage);
+        }
 
 
         //

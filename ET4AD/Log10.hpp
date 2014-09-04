@@ -20,10 +20,35 @@ namespace et4ad {
      * @param expr
      */
     template <class REAL_T, class EXPR>
+    class Log10;
+}
+
+namespace std {
+
+    /**
+     * Override for the log function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Log10<REAL_T, EXPR> log10(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+}
+
+
+namespace et4ad {
+
+    /**
+     * Expression template to compute the log base 10 of an expression 
+     * template.
+     * 
+     * @param expr
+     */
+    template <class REAL_T, class EXPR>
     class Log10 : public ExpressionBase<REAL_T, Log10<REAL_T, EXPR> > {
     public:
 
-        inline explicit Log10(const ExpressionBase<REAL_T, EXPR>& expr)
+        Log10(const ExpressionBase<REAL_T, EXPR>& expr)
         : expr_m(expr.Cast()) {
         }
 
@@ -49,24 +74,8 @@ namespace et4ad {
             }
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            expr_m.Derivative(id, dx);
-            dx /= (expr_m.GetValue() * std::log(10.0));
-        }
-
         inline const REAL_T Derivative(const uint32_t id) const {
-            return (expr_m.Derivative(id)) / (expr_m.GetValue() * std::log(10.0));
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            expr_m.Derivative(gradient);
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] /= (expr_m.GetValue() * std::log(10.0));
-            }
-        }
-        
-        inline size_t Size() const {
-            return expr_m.Size();
+            return (expr_m.Derivative(id) * 1.0) / (expr_m.GetValue() * std::log(10.0));
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -93,6 +102,20 @@ namespace et4ad {
 
 }
 
+namespace std {
+
+    /**
+     * Override for the log function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Log10<REAL_T, EXPR> log10(const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+
+        return et4ad::Log10<REAL_T, EXPR > (expr.Cast());
+    }
+}
 
 #endif	/* LOG10_HPP */
 

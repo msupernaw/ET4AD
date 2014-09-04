@@ -11,6 +11,78 @@
 #include <cmath>
 #include "Expression.hpp"
 
+namespace et4ad {
+
+    /**
+     * Expression template for computing the two argument inverse tangent,
+     * where both arguments are expression templates. 
+     * 
+     */
+    template <class REAL_T, class EXPR1, class EXPR2>
+    struct ATan2;
+    
+      /**
+     * Expression template for computing the two argument inverse tangent,
+     * where both the first argument is an expression template, the second
+     * is constant. 
+     * 
+     */
+    template <class REAL_T, class EXPR1>
+    struct ATan2Constant;
+    
+     /**
+     * Expression template for computing the two argument inverse tangent,
+     * where both arguments are expression templates. 
+     * 
+     */
+    template <class REAL_T, class EXPR2>
+    struct ConstantATan2;
+    
+}
+    
+
+
+namespace std {
+
+    /**
+     * Override for the atan2 function in namespace std.
+     * 
+     * @param expr1
+     * @param expr2
+     * @return 
+     */
+    template <class REAL_T, class EXPR1, class EXPR2>
+    inline
+    et4ad::ATan2<REAL_T, EXPR1, EXPR2> atan2(const et4ad::ExpressionBase<REAL_T, EXPR1>& expr1,
+            const et4ad::ExpressionBase<REAL_T, EXPR2>& expr2);
+
+    /**
+     * Override for the atan2 function in namespace std.
+     * 
+     * @param expr1
+     * @param val
+     * @return 
+     */
+    template <class REAL_T, class EXPR>
+    inline
+    et4ad::ATan2Constant<REAL_T, EXPR > atan2(const et4ad::ExpressionBase<REAL_T, EXPR>& expr,
+            const REAL_T& val);
+
+    /**
+     * Override for the atan2 function in namespace std.
+     * 
+     * @param expr1
+     * @param expr2
+     * @return 
+     */
+    template <class REAL_T, class EXPR>
+    inline
+    et4ad::ConstantATan2<REAL_T, EXPR> atan2(const REAL_T& val,
+            const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+
+
+
+}
 
 namespace et4ad {
 
@@ -22,7 +94,7 @@ namespace et4ad {
     template <class REAL_T, class EXPR1, class EXPR2>
     struct ATan2 : public ExpressionBase<REAL_T, ATan2<REAL_T, EXPR1, EXPR2> > {
 
-        inline explicit ATan2(const ExpressionBase<REAL_T, EXPR1>& expr1, const ExpressionBase<REAL_T, EXPR2>& expr2)
+        ATan2(const ExpressionBase<REAL_T, EXPR1>& expr1, const ExpressionBase<REAL_T, EXPR2>& expr2)
         : expr1_m(expr1.Cast()), expr2_m(expr2.Cast()), value1_m(expr1.GetValue()), value2_m(expr2.GetValue()) {
         }
 
@@ -51,26 +123,8 @@ namespace et4ad {
             }
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            expr1_m.Derivative(id, dx);
-            dx *= value2_m;
-            dx /= (value1_m * value1_m + (value2_m * value2_m));
-        }
-
         inline const REAL_T Derivative(const uint32_t id) const {
             return ((value2_m * expr1_m.Derivative(id)) / (value1_m * value1_m + (value2_m * value2_m)));
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            expr1_m.Derivative(gradient);
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= value2_m;
-                gradient[i] /= (value1_m * value1_m + (value2_m * value2_m));
-            }
-        }
-
-        inline size_t Size() const {
-            return expr1_m.Size() > expr2_m.Size() ? expr1_m.Size() : expr2_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -116,7 +170,7 @@ namespace et4ad {
     template <class REAL_T, class EXPR1>
     struct ATan2Constant : public ExpressionBase<REAL_T, ATan2Constant<REAL_T, EXPR1> > {
 
-        inline explicit ATan2Constant(const ExpressionBase<REAL_T, EXPR1>& expr1, const REAL_T & expr2)
+        ATan2Constant(const ExpressionBase<REAL_T, EXPR1>& expr1, const REAL_T & expr2)
         : expr1_m(expr1.Cast()), expr2_m(expr2), value1_m(expr1_m.GetValue()) {
         }
 
@@ -145,27 +199,13 @@ namespace et4ad {
             }
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            expr1_m.Derivative(id, dx);
-            dx *= expr2_m;
-            dx /= (value1_m * value1_m + (expr2_m * expr2_m));
-        }
-
         inline const REAL_T Derivative(const uint32_t & id) const {
             return ((expr2_m * expr1_m.Derivative(id)) / (value1_m * value1_m + (expr2_m * expr2_m)));
 
         }
 
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            expr1_m.Derivative(gradient);
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= expr2_m;
-                gradient[i] /= (value1_m * value1_m + (expr2_m * expr2_m));
-            }
-        }
-
-        inline size_t Size() const {
-            return expr1_m.Size();
+        void Derivative(REAL_T &d, const uint32_t & id) const {
+            d = ((expr2_m * expr1_m.Derivative(d, id)) / (value1_m * value1_m + (expr2_m * expr2_m)));
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -200,7 +240,7 @@ namespace et4ad {
     template <class REAL_T, class EXPR2>
     struct ConstantATan2 : public ExpressionBase<REAL_T, ConstantATan2<REAL_T, EXPR2> > {
 
-        inline explicit ConstantATan2(const REAL_T& expr1, const ExpressionBase<REAL_T, EXPR2>& expr2)
+        ConstantATan2(const REAL_T& expr1, const ExpressionBase<REAL_T, EXPR2>& expr2)
         : expr1_m(expr1), expr2_m(expr2.Cast()) {
         }
 
@@ -230,24 +270,12 @@ namespace et4ad {
             //            }
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            dx = 0.0;
-        }
-
         inline const REAL_T Derivative(const uint32_t & id) const {
             return 0.0;
         }
 
         void Derivative(REAL_T &d, const uint32_t & id) const {
             d = 0.0;
-        }
-
-        inline size_t Size() const {
-            return expr2_m.Size();
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            gradient.resize(0);
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -275,6 +303,50 @@ namespace et4ad {
 
 }
 
+namespace std {
 
+    /**
+     * Override for the atan2 function in namespace std.
+     * 
+     * @param expr1
+     * @param expr2
+     * @return 
+     */
+    template <class REAL_T, class EXPR1, class EXPR2>
+    inline
+    et4ad::ATan2<REAL_T, EXPR1, EXPR2> atan2(const et4ad::ExpressionBase<REAL_T, EXPR1>& expr1,
+            const et4ad::ExpressionBase<REAL_T, EXPR2>& expr2) {
+        return et4ad::ATan2<REAL_T, EXPR1, EXPR2 > (expr1.Cast(), expr2.Cast());
+    }
+
+    /**
+     * Override for the atan2 function in namespace std.
+     * 
+     * @param expr1
+     * @param val
+     * @return 
+     */
+    template <class REAL_T, class EXPR>
+    inline
+    et4ad::ATan2Constant<REAL_T, EXPR > atan2(const et4ad::ExpressionBase<REAL_T, EXPR>& expr,
+            const REAL_T& val) {
+        return et4ad::ATan2Constant<REAL_T, EXPR> (expr.Cast(), val);
+    }
+
+    /**
+     * Override for the atan2 function in namespace std.
+     * 
+     * @param expr1
+     * @param expr2
+     * @return 
+     */
+    template <class REAL_T, class EXPR>
+    inline
+    et4ad::ConstantATan2<REAL_T, EXPR> atan2(const REAL_T& val,
+            const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+        return et4ad::ConstantATan2<REAL_T, EXPR > (val, expr.Cast());
+    }
+
+}
 #endif	/* ATAN2_HPP */
 

@@ -15,7 +15,7 @@ namespace et4ad {
     template <class REAL_T, class LHS, class RHS>
     struct Add : public ExpressionBase<REAL_T, Add<REAL_T, LHS, RHS> > {
 
-        inline explicit Add(const ExpressionBase<REAL_T, LHS>& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
+        Add(const ExpressionBase<REAL_T, LHS>& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
         : /*value_m(lhs.Cast().GetValue()+rhs.Cast().GetValue()),*/ lhs_m(lhs.Cast()), rhs_m(rhs.Cast()) {
 
 
@@ -37,29 +37,8 @@ namespace et4ad {
             return lhs_m.Derivative(id, found) + rhs_m.Derivative(id, found);
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            lhs_m.Derivative(id, dx);
-            dx += rhs_m.Derivative(id);
-        }
-
         inline const REAL_T Derivative(const uint32_t & id) const {
             return lhs_m.Derivative(id) + rhs_m.Derivative(id);
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            lhs_m.Derivative(gradient);
-            std::vector<REAL_T> tmp;
-            rhs_m.Derivative(tmp);
-
-            tmp.size() > gradient.size() ? gradient.resize(tmp.size()) : tmp.resize(gradient.size());
-
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] += tmp[i];
-            }
-        }
-
-        inline size_t Size() const {
-            return lhs_m.Size() > rhs_m.Size() ? lhs_m.Size() : rhs_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -106,7 +85,7 @@ namespace et4ad {
     template <class REAL_T, class LHS>
     struct AddConstant : public ExpressionBase<REAL_T, AddConstant<REAL_T, LHS> > {
 
-        inline explicit AddConstant(const ExpressionBase<REAL_T, LHS>& lhs, const REAL_T & rhs)
+        AddConstant(const ExpressionBase<REAL_T, LHS>& lhs, const REAL_T & rhs)
         : lhs_m(lhs.Cast()), rhs_m(rhs) {
 
 
@@ -128,21 +107,8 @@ namespace et4ad {
             return lhs_m.Derivative(id, found);
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            lhs_m.Derivative(id, dx);
-
-        }
-
         inline const REAL_T Derivative(const uint32_t & id) const {
             return lhs_m.Derivative(id);
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            lhs_m.Derivative(gradient);
-        }
-
-        inline size_t Size() const {
-            return lhs_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -183,7 +149,7 @@ namespace et4ad {
     template <class REAL_T, class RHS>
     struct ConstantAdd : public ExpressionBase<REAL_T, ConstantAdd<REAL_T, RHS> > {
 
-        inline explicit ConstantAdd(const REAL_T& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
+        ConstantAdd(const REAL_T& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
         : lhs_m(lhs), rhs_m(rhs.Cast()), value_m(lhs_m + rhs_m.GetValue()) {
 
 
@@ -205,20 +171,8 @@ namespace et4ad {
             return rhs_m.Derivative(id, found);
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T & dx) const {
-            rhs_m.Derivative(id, dx);
-        }
-
         inline const REAL_T Derivative(const uint32_t & id) const {
             return rhs_m.Derivative(id);
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            rhs_m.Derivative(gradient);
-        }
-
-        inline size_t Size() const {
-            return rhs_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {

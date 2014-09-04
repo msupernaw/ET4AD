@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="94">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>Chain.hpp</itemPath>
+      <itemPath>Statement.hpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <itemPath>ACos.hpp</itemPath>
+    <itemPath>ASin.hpp</itemPath>
+    <itemPath>ATan.hpp</itemPath>
+    <itemPath>ATan2.hpp</itemPath>
+    <itemPath>Add.hpp</itemPath>
+    <itemPath>AlignedAllocator.hpp</itemPath>
+    <itemPath>Array.hpp</itemPath>
+    <itemPath>ArrayAdd.hpp</itemPath>
+    <itemPath>ArrayDivide.hpp</itemPath>
+    <itemPath>ArrayMultiply.hpp</itemPath>
+    <itemPath>ArraySubtract.hpp</itemPath>
+    <itemPath>ArrayTraits.hpp</itemPath>
+    <itemPath>BasicVariable.hpp</itemPath>
+    <itemPath>Ceil.hpp</itemPath>
+    <itemPath>Console.hpp</itemPath>
+    <itemPath>Constant.hpp</itemPath>
+    <itemPath>Cos.hpp</itemPath>
+    <itemPath>Cosh.hpp</itemPath>
+    <itemPath>Divide.hpp</itemPath>
+    <itemPath>ET4AD.hpp</itemPath>
+    <itemPath>Exp.hpp</itemPath>
+    <itemPath>Expression.hpp</itemPath>
+    <itemPath>Fabs.hpp</itemPath>
+    <itemPath>Floor.hpp</itemPath>
+    <itemPath>FunctionMinimizer.hpp</itemPath>
+    <itemPath>GradientFile.hpp</itemPath>
+    <itemPath>IDGenerator.hpp</itemPath>
+    <itemPath>IDSet.hpp</itemPath>
+    <itemPath>IOStream.hpp</itemPath>
+    <itemPath>IndependentVariable.hpp</itemPath>
+    <itemPath>Log.hpp</itemPath>
+    <itemPath>Log10.hpp</itemPath>
+    <itemPath>MFExp.hpp</itemPath>
+    <itemPath>Multiply.hpp</itemPath>
+    <itemPath>NetCDF.hpp</itemPath>
+    <itemPath>Pow.hpp</itemPath>
+    <itemPath>Quad.hpp</itemPath>
+    <itemPath>SSE.hpp</itemPath>
+    <itemPath>STD.hpp</itemPath>
+    <itemPath>Serialization.hpp</itemPath>
+    <itemPath>Sin.hpp</itemPath>
+    <itemPath>Sinh.hpp</itemPath>
+    <itemPath>Sqrt.hpp</itemPath>
+    <itemPath>Stack.hpp</itemPath>
+    <itemPath>Subtract.hpp</itemPath>
+    <itemPath>TableView.hpp</itemPath>
+    <itemPath>Tan.hpp</itemPath>
+    <itemPath>Tanh.hpp</itemPath>
+    <itemPath>Traits.hpp</itemPath>
+    <itemPath>Variable.hpp</itemPath>
+    <itemPath>VariableStorage.hpp</itemPath>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>CLang|CLang</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+      </compileType>
+      <item path="ACos.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ASin.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ATan.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ATan2.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Add.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="AlignedAllocator.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Array.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayAdd.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayDivide.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayMultiply.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArraySubtract.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayTraits.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="BasicVariable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Ceil.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Chain.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Console.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Constant.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Cos.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Cosh.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Divide.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ET4AD.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Exp.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Expression.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Fabs.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Floor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FunctionMinimizer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GradientFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IDGenerator.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IDSet.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IOStream.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IndependentVariable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Log.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Log10.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MFExp.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Multiply.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NetCDF.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Pow.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Quad.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SSE.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="STD.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Serialization.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Sin.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Sinh.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Sqrt.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Stack.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Statement.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Subtract.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TableView.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Tan.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Tanh.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Traits.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Variable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="VariableStorage.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>0</developmentMode>
+          <commandLine>-O4 -std=c++11 -stdlib=libc++</commandLine>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="ACos.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ASin.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ATan.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ATan2.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Add.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="AlignedAllocator.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Array.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayAdd.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayDivide.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayMultiply.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArraySubtract.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ArrayTraits.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="BasicVariable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Ceil.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Chain.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Console.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Constant.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Cos.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Cosh.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Divide.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ET4AD.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Exp.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Expression.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Fabs.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Floor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FunctionMinimizer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GradientFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IDGenerator.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IDSet.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IOStream.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="IndependentVariable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Log.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Log10.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MFExp.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Multiply.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NetCDF.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Pow.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Quad.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="SSE.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="STD.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Serialization.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Sin.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Sinh.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Sqrt.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Stack.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Statement.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Subtract.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="TableView.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Tan.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Tanh.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Traits.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Variable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="VariableStorage.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

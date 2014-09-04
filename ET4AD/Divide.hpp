@@ -21,20 +21,15 @@ namespace et4ad {
         const REAL_T lhs_value_m;
         const REAL_T rhs_value_m;
         const REAL_T mult;
-        const REAL_T mult2;
-        const REAL_T value;
 
-        inline explicit Divide(const ExpressionBase<REAL_T, LHS>& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
-        : lhs_m(lhs.Cast()), rhs_m(rhs.Cast()), value(lhs_value_m*mult),
-        lhs_value_m(lhs_m.GetValue()),
-        rhs_value_m(rhs_m.GetValue()),
-        mult2(mult*mult), mult(1.0 / (rhs_value_m)) {
+        Divide(const ExpressionBase<REAL_T, LHS>& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
+        : lhs_m(lhs.Cast()), rhs_m(rhs.Cast()), lhs_value_m(lhs_m.GetValue()), rhs_value_m(rhs_m.GetValue()), mult(1.0 / (rhs_value_m)) {
 
 
         }
 
         inline const REAL_T GetValue() const {
-            return value;
+            return lhs_value_m*mult;
         }
 
         operator REAL_T() {
@@ -51,41 +46,13 @@ namespace et4ad {
                     lhs_value_m * rhs_m.Derivative(id, found)) / (rhs_value_m * rhs_value_m);
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            
-            REAL_T ldx, rdx;
-            lhs_m.Derivative(id, ldx);
-            rhs_m.Derivative(id, rdx);
-            dx = (rhs_value_m * ldx -
-                    rdx * lhs_value_m) * mult2;
-        }
-
         inline const REAL_T Derivative(const uint32_t &id) const {
             //             REAL_T d = rhs_value_m*lhs_m.Derivative(id);
             //             d-=rhs_m.Derivative(id)*lhs_value_m;
             //             d*=mult;
             //             return d;
             return ( rhs_value_m * lhs_m.Derivative(id) -
-                    rhs_m.Derivative(id) * lhs_value_m) *mult2; /// (rhs_value_m * rhs_value_m);
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-
-            lhs_m.Derivative(gradient);
-            std::vector<REAL_T> tmp;
-            rhs_m.Derivative(tmp);
-
-            tmp.size() > gradient.size() ? gradient.resize(tmp.size()) : tmp.resize(gradient.size());
-
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= rhs_value_m;
-                gradient[i] -= (tmp[i] * lhs_value_m);
-                gradient[i] *= mult2;
-            }
-        }
-
-        inline size_t Size() const {
-            return lhs_m.Size() > rhs_m.Size() ? lhs_m.Size() : rhs_m.Size();
+                    rhs_m.Derivative(id) * lhs_value_m) *mult*mult; /// (rhs_value_m * rhs_value_m);
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -130,7 +97,7 @@ namespace et4ad {
     class DivideConstant : public ExpressionBase<REAL_T, DivideConstant<REAL_T, LHS> > {
     public:
 
-        inline explicit DivideConstant(const ExpressionBase<REAL_T, LHS>& lhs, const REAL_T& rhs)
+        DivideConstant(const ExpressionBase<REAL_T, LHS>& lhs, const REAL_T& rhs)
         : lhs_m(lhs.Cast()), rhs_m(rhs), value_m(lhs_m.GetValue() / rhs_m) {
 
 
@@ -152,28 +119,8 @@ namespace et4ad {
             return (lhs_m.Derivative(id, found) * rhs_m) / (rhs_m * rhs_m);
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            lhs_m.Derivative(id, dx);
-            dx *= rhs_m;
-            dx /= rhs_m*rhs_m;
-        }
-
         inline const REAL_T Derivative(const uint32_t &id) const {
             return (lhs_m.Derivative(id) * rhs_m) / (rhs_m * rhs_m);
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-
-            lhs_m.Derivative(gradient);
-
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= rhs_m;
-                gradient[i] /= rhs_m*rhs_m;
-            }
-        }
-
-        inline size_t Size() const {
-            return lhs_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -226,7 +173,7 @@ namespace et4ad {
     class ConstantDivide : public ExpressionBase<REAL_T, ConstantDivide<REAL_T, RHS> > {
     public:
 
-        inline explicit ConstantDivide(const REAL_T& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
+        ConstantDivide(const REAL_T& lhs, const ExpressionBase<REAL_T, RHS>& rhs)
         : lhs_m(lhs), rhs_m(rhs.Cast()), value_m(lhs_m / rhs_m.GetValue()) {
 
 
@@ -248,28 +195,8 @@ namespace et4ad {
             return (0 - lhs_m * rhs_m.Derivative(id, found)) / (rhs_m.GetValue() * rhs_m.GetValue());
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            rhs_m.Derivative(id, dx);
-            dx *= 0 - lhs_m;
-            dx /= (rhs_m.GetValue() * rhs_m.GetValue());
-        }
-
         inline const REAL_T Derivative(const uint32_t &id) const {
             return (0 - lhs_m * rhs_m.Derivative(id)) / (rhs_m.GetValue() * rhs_m.GetValue());
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-
-            rhs_m.Derivative(gradient);
-
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= 0 - lhs_m;
-                gradient[i] /= (rhs_m.GetValue() * rhs_m.GetValue());
-            }
-        }
-
-        inline size_t Size() const {
-            return rhs_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {

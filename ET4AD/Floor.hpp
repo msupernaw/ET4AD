@@ -19,10 +19,34 @@ namespace et4ad {
      * @param a
      */
     template <class REAL_T, class EXPR>
+    class Floor;
+    
+}
+
+namespace std {
+
+    /**
+     * Override for the floor function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Floor<REAL_T, EXPR> floor(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+}
+
+namespace et4ad {
+
+    /**
+     * Expression template for handling the floor of an expression template.
+     * 
+     * @param a
+     */
+    template <class REAL_T, class EXPR>
     class Floor : public ExpressionBase<REAL_T, Floor<REAL_T, EXPR> > {
     public:
 
-        inline explicit Floor(const ExpressionBase<REAL_T, EXPR>& a)
+        Floor(const ExpressionBase<REAL_T, EXPR>& a)
         : expr_m(a.Cast()) {
         }
 
@@ -42,20 +66,8 @@ namespace et4ad {
             return 0.0;
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            dx = 0.0;
-        }
-
         inline const REAL_T Derivative(const uint32_t &id) const {
             return 0.0;
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            gradient.resize(0);
-        }
-
-        inline size_t Size() const {
-            return expr_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -81,6 +93,20 @@ namespace et4ad {
 
 }
 
+namespace std {
+
+    /**
+     * Override for the floor function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Floor<REAL_T, EXPR> floor(const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+
+        return et4ad::Floor<REAL_T, EXPR > (expr.Cast());
+    }
+}
 
 #endif	/* FLOOR_HPP */
 

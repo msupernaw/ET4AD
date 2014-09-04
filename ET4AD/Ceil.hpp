@@ -19,10 +19,32 @@ namespace et4ad {
      * @param expr
      */
     template <class REAL_T, class EXPR>
+    class Ceil;
+}
+
+namespace std {
+
+    /**
+     * Override for the ceil function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Ceil<REAL_T, EXPR> ceil(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+}
+
+namespace et4ad {
+
+    /**
+     * Expression template for handling the ceiling of an expression template.
+     * @param expr
+     */
+    template <class REAL_T, class EXPR>
     class Ceil : public ExpressionBase<REAL_T, Ceil<REAL_T, EXPR> > {
     public:
 
-        inline explicit Ceil(const ExpressionBase<REAL_T, EXPR>& expr)
+        Ceil(const ExpressionBase<REAL_T, EXPR>& expr)
         : expr_m(expr.Cast()) {
         }
 
@@ -42,20 +64,8 @@ namespace et4ad {
             return 0.0;
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            dx = 0.0;
-        }
-
         inline const REAL_T Derivative(const uint32_t &id) const {
             return 0.0;
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            gradient.resize(0);
-        }
-
-        inline size_t Size() const {
-            return expr_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -82,6 +92,20 @@ namespace et4ad {
 
 
 
+}
+
+namespace std {
+
+    /**
+     * Override for the ceil function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Ceil<REAL_T, EXPR> ceil(const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+        return et4ad::Ceil<REAL_T, EXPR > (expr.Cast());
+    }
 }
 
 

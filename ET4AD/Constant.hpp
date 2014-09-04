@@ -40,10 +40,6 @@ namespace et4ad {
             return this->GetValue();
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            dx = 0.0;
-        }
-
         const REAL_T Derivative(const uint32_t &id, bool &found) const {
             return static_cast<REAL_T> (0.0);
         }
@@ -52,14 +48,6 @@ namespace et4ad {
             return static_cast<REAL_T> (0.0);
         }
 
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            gradient.resize(0);
-        }
-
-        inline size_t Size() const {
-            return 0;
-        }
-        
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
         }
 

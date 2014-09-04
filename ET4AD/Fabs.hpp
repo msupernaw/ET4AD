@@ -10,6 +10,30 @@
 
 #include <cmath>
 #include "Expression.hpp"
+namespace et4ad {
+
+    /**
+     * Expression template for handling the absolute value of a expression 
+     * template.
+     * @param expr
+     */
+    template <class REAL_T, class EXPR>
+    class Fabs;
+
+}
+
+namespace std {
+
+    /**
+     * Override for the fabs function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Fabs<REAL_T, EXPR> fabs(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+
+}
 
 namespace et4ad {
 
@@ -22,7 +46,7 @@ namespace et4ad {
     class Fabs : public ExpressionBase<REAL_T, Fabs<REAL_T, EXPR> > {
     public:
 
-        inline explicit Fabs(const ExpressionBase<REAL_T, EXPR>& expr)
+        Fabs(const ExpressionBase<REAL_T, EXPR>& expr)
         : expr_m(expr.Cast()) {
         }
 
@@ -53,24 +77,6 @@ namespace et4ad {
             return (expr_m.Derivative(id) * expr_m.GetValue()) / std::fabs(expr_m.GetValue());
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            expr_m.Derivative(id, dx);
-            dx *= expr_m.GetValue();
-            dx /= std::fabs(expr_m.GetValue());
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            expr_m.Derivative(gradient);
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= expr_m.GetValue();
-                gradient[i] /= std::fabs(expr_m.GetValue());
-            }
-        }
-
-        inline size_t Size() const {
-            return expr_m.Size();
-        }
-
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
             expr_m.PushIds(storage);
         }
@@ -92,6 +98,22 @@ namespace et4ad {
         const EXPR& expr_m;
     };
 
+
+}
+
+namespace std {
+
+    /**
+     * Override for the fabs function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Fabs<REAL_T, EXPR> fabs(const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+
+        return et4ad::Fabs<REAL_T, EXPR > (expr.Cast());
+    }
 
 }
 

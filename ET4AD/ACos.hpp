@@ -10,6 +10,30 @@
 
 #include <cmath>
 #include "Expression.hpp"
+namespace et4ad {
+
+    /**
+     * Expression template for computing the inverse cosine of an expression
+     * template.
+     * 
+     * @param a
+     */
+    template <class REAL_T, class EXPR>
+    class ACos;
+}
+
+
+namespace std {
+
+    /**
+     * Override for the asin function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::ACos<REAL_T, EXPR> acos(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+}
 
 namespace et4ad {
 
@@ -23,7 +47,7 @@ namespace et4ad {
     class ACos : public ExpressionBase<REAL_T, ACos<REAL_T, EXPR> > {
     public:
 
-        inline explicit ACos(const ExpressionBase<REAL_T, EXPR>& a)
+        ACos(const ExpressionBase<REAL_T, EXPR>& a)
         : expr_m(a.Cast()) {
         }
 
@@ -39,7 +63,7 @@ namespace et4ad {
             return this->GetValue();
         }
 
-        inline const REAL_T Derivative(const uint32_t& id, bool &found) const {
+        inline const REAL_T Derivative(const uint32_t id, bool &found) const {
 
             REAL_T dx = expr_m.Derivative(id, found);
             if (found) {
@@ -50,26 +74,10 @@ namespace et4ad {
             }
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            expr_m.Derivative(id, dx);
-            dx *= (static_cast<REAL_T> (-1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(expr_m.GetValue(), static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-        }
-
-        inline const REAL_T Derivative(const uint32_t& id) const {
+        inline const REAL_T Derivative(const uint32_t id) const {
             return (expr_m.Derivative(id) * static_cast<REAL_T> (-1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(expr_m.GetValue(), static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
         }
 
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            expr_m.Derivative(gradient);
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= (static_cast<REAL_T> (-1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(expr_m.GetValue(), static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-            }
-        }
-
-        inline size_t Size() const {
-            return expr_m.Size();
-        }
-        
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
             expr_m.PushIds(storage);
         }
@@ -95,5 +103,19 @@ namespace et4ad {
 
 }
 
+namespace std {
+
+    /**
+     * Override for the asin function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::ACos<REAL_T, EXPR> acos(const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+        return et4ad::ACos<REAL_T, EXPR > (expr.Cast());
+    }
+
+}
 #endif	/* ACOS_HPP */
 

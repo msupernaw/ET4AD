@@ -20,10 +20,32 @@ namespace et4ad {
      * expression template.
      */
     template <class REAL_T, class EXPR>
+    class Cosh;
+
+}
+
+namespace std {
+    /**
+     * Override for the cosh function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Cosh<REAL_T, EXPR> cosh(const et4ad::ExpressionBase<REAL_T, EXPR>& expr);
+}
+
+namespace et4ad {
+
+    /**
+     * Expression template for computing the hyperbolic cosine of an 
+     * expression template.
+     */
+    template <class REAL_T, class EXPR>
     class Cosh : public ExpressionBase<REAL_T, Cosh<REAL_T, EXPR> > {
     public:
 
-        inline explicit Cosh(const ExpressionBase<REAL_T, EXPR>& expr)
+        Cosh(const ExpressionBase<REAL_T, EXPR>& expr)
         : expr_m(expr.Cast()), value_m(expr.GetValue()) {
         }
 
@@ -49,24 +71,8 @@ namespace et4ad {
             }
         }
 
-        inline void Derivative(const uint32_t& id, REAL_T& dx) const {
-            expr_m.Derivative(id, dx);
-            dx *= std::sinh(value_m);
-        }
-
         inline const REAL_T Derivative(const uint32_t &id) const {
             return expr_m.Derivative(id) * std::sinh(value_m);
-        }
-
-        inline void Derivative(std::vector<REAL_T>& gradient) const {
-            expr_m.Derivative(gradient);
-            for (int i = 0; i < gradient.size(); i++) {
-                gradient[i] *= std::sinh(value_m);
-            }
-        }
-        
-        inline size_t Size() const {
-            return expr_m.Size();
         }
 
         inline void PushIds(et4ad::VariableStorage<REAL_T> &storage) const {
@@ -95,7 +101,20 @@ namespace et4ad {
 
 }
 
+namespace std {
 
+    /**
+     * Override for the cosh function in namespace std.
+     * 
+     * @param expr
+     * @return 
+     */
+    template<class REAL_T, class EXPR>
+    inline const et4ad::Cosh<REAL_T, EXPR> cosh(const et4ad::ExpressionBase<REAL_T, EXPR>& expr) {
+
+        return et4ad::Cosh<REAL_T, EXPR > (expr.Cast());
+    }
+}
 
 
 

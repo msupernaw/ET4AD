@@ -9,7 +9,7 @@
 #define	IDSET_HPP
 
 #include "IDGenerator.hpp"
-#include "AlignedAllocator.hpp"
+#include <queue>
 
 namespace et4ad {
 
@@ -19,10 +19,8 @@ namespace et4ad {
      */
     class IDSet {
     private:
-        
-        
-        std::vector<uint32_t, util::aligned_allocator<uint32_t, 16 > > list_m;
-        std::vector<bool, util::aligned_allocator<bool, 16 > > has_m;
+        std::vector<uint32_t> list_m;
+        std::vector<int> has_m;
         size_t has_size;
 
 
@@ -30,13 +28,11 @@ namespace et4ad {
         //        template<class T, int group>
         //        friend class Variable;
     public:
-        typedef std::vector<uint32_t, util::aligned_allocator<uint32_t, 16 > >::iterator id_iterator;
+        typedef std::vector<uint32_t>::iterator id_iterator;
         uint32_t max;
 
         IDSet() {
             //            idsss = IndependentVariableIdGenerator::instance()->getIds();
-            
-            
             has_m.reserve(IndependentVariableIdGenerator::instance()->current() + 1);
             has_size = has_m.size();
             list_m.reserve(IndependentVariableIdGenerator::instance()->current() + 1);
@@ -53,51 +49,44 @@ namespace et4ad {
                 has_m.resize(IndependentVariableIdGenerator::instance()->current() + 1);
                 has_size = has_m.size();
                 list_m.reserve(IndependentVariableIdGenerator::instance()->current() + 1);
-
             }
 
             if (!unsigned(has_m[id])) {
                 has_m[id] = 1;
-                //                list_m.insert(list_m.end(),id);
+//                list_m.insert(list_m.end(),id);
                 list_m.push_back(id);
-                //                                SortSet();
+//                                this->SortSet();
             }
 
 
         }
 
-        bool Has(const uint32_t& id) const{
-            return (unsigned(has_size) > unsigned(id)) ? has_m[id] : false;
-        }
-        
         id_iterator begin() {
-            return list_m.begin();
+            return this->list_m.begin();
         }
 
         id_iterator end() {
-            return list_m.end();
+            return this->list_m.end();
         }
 
         size_t Size() {
-            return list_m.size();
+            return this->list_m.size();
         }
 
         uint32_t* Data() {
-            return list_m.data();
+            return this->list_m.data();
         }
 
         void clear() {
-            has_size = 0;
-            has_m.resize(0);
-            list_m.resize(0);
+            this->has_size = 0;
+            this->has_m.resize(0);
+            this->list_m.resize(0);
             has_m.resize(IndependentVariableIdGenerator::instance()->current() + 1);
         }
 
         void SortSet() {
-            std::sort(list_m.begin(), list_m.end());
+            std::sort(this->list_m.begin(), this->list_m.end());
         }
-
-
 
 
 
