@@ -44,7 +44,7 @@ namespace et4ad {
     public:
 
         Log(const ExpressionBase<REAL_T, EXPR>& expr)
-        : expr_m(expr.Cast()), value_m(expr_m.GetValue()), value2_m(1.0 / value_m) {
+        : expr_m(expr.Cast()), value_m(expr_m.GetValue()), value2_m(REAL_T(1.0) / value_m) {
         }
 
         inline const REAL_T GetValue() const {
