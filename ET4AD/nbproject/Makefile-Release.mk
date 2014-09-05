@@ -42,8 +42,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-fvectorize -O4 -std=c++11 -stdlib=libc++
-CXXFLAGS=-fvectorize -O4 -std=c++11 -stdlib=libc++
+CCFLAGS=-fvectorize -funroll-loops -O4 -std=c++11 -stdlib=libc++
+CXXFLAGS=-fvectorize -funroll-loops -O4 -std=c++11 -stdlib=libc++
 
 # Fortran Compiler Flags
 FFLAGS=

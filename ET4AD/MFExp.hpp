@@ -85,9 +85,9 @@ namespace et4ad {
         inline const std::complex<REAL_T> ComplexStepValue(const uint32_t & id, REAL_T h = REAL_T(0.00000000000001)) const {
             std::complex<REAL_T> value = expr_m.ComplexStepValue(id, h);
             std::complex<REAL_T> b(60);
-            if (value <= b && value >= std::complex<REAL_T>(-1) * b) {
+            if (value.real() <= b.real()  && value.real()  >= (std::complex<REAL_T>(-1) * b).real() ) {
                 return std::exp(value);
-            } else if (value > b) {
+            } else if (value.real()  > b.real() ) {
                 return /*std::exp(b)*/std::complex<REAL_T>(EXP_OF_B) * (std::complex<REAL_T>(1.) + std::complex<REAL_T>(2.) * (value - b)) / (std::complex<REAL_T>(1.) + value - b);
             } else {
                 return std::exp(std::complex<REAL_T>(-1) * b)*(std::complex<REAL_T>(1.) - value - b) / (std::complex<REAL_T>(1.) + std::complex<REAL_T>(2.) * (std::complex<REAL_T>(-1) * value - b));

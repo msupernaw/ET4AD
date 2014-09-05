@@ -12,12 +12,39 @@
 #include "VariableStorage.hpp"
 //#include "Expression.hpp"
 #include "STD.hpp"
+#include <fstream>
 
-#define H_V .00000000000001
-#define USE_COMPLEX_STEP
+
+#define H_V 1.0E-20
+
+//#define USE_COMPLEX_STEP_DIFFERNTIATION
+
+//#define ET4AD_TEST_AND_VERIFY_RUNTIME
+
+#if defined(ET4AD_TEST_AND_VERIFY_RUNTIME) && !defined(ET4AD_TEST_AND_VERIFY)
+#define ET4AD_TEST_AND_VERIFY
+#endif
+#ifdef ET4AD_TEST_AND_VERIFY
+#define ET4AD_TEST_AND_VERIFY_PRECISION 100000.0
+#endif
+
 
 namespace et4ad {
 
+#ifdef ET4AD_TEST_AND_VERIFY
+    
+    std::ofstream et4ad_test_and_verify_log("et4ad_derivative_test.log");
+    template <class REAL_T>
+    static void Derivative_Test( const REAL_T& a, const REAL_T& b,char* func ="not supplied"){
+        
+        if(!(std::trunc(ET4AD_TEST_AND_VERIFY_PRECISION*a)== std::trunc(ET4AD_TEST_AND_VERIFY_PRECISION*b))){
+            et4ad_test_and_verify_log.precision(50);
+            et4ad_test_and_verify_log<<"derivative test failed from function \""<<func<<"\": "<<a<<" != "<<b<<"\n";
+        }
+    }
+    
+#endif
+    
 
 
     template<class REAL_T, //base type
@@ -142,7 +169,7 @@ namespace et4ad {
 
                 for (int i = 0; i < size; i++) {
                     //                    
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ids[i]] = orig.ComplexStepValue(ids[i], H_V).imag() / H_V;
 #else
                     gradient[ids[i]] = orig.Derivative(ids[i]);
@@ -229,7 +256,7 @@ namespace et4ad {
 
                     //                    gradient[ids[i]] = expr.Derivative(ids[i]);
                     //                    gradient[ids[i]] = expr.ComplexStepValue(ids[i], H_V).imag() / H_V;
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ids[i]] = expr.ComplexStepValue(ids[i], H_V).imag() / H_V;
 #else
                     gradient[ids[i]] = expr.Derivative(ids[i]);
@@ -300,7 +327,7 @@ namespace et4ad {
                 int i;
                 for (i = 0; i < size; i++) {
                     //                    gradient[ids[i]] = other.Derivative(ids[i]);
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ids[i]] = other.ComplexStepValue(ids[i], H_V).imag() / H_V;
 #else
                     gradient[ids[i]] = other.Derivative(ids[i]);
@@ -347,7 +374,7 @@ namespace et4ad {
                 int i;
                 for (i = 0; i < size; i++) {
                     //                    gradient[ids[i]] = expr.Derivative(ids[i]);
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ids[i]] = expr.ComplexStepValue(ids[i], H_V).imag() / H_V;
 #else
                     gradient[ids[i]] = expr.Derivative(ids[i]);
@@ -412,7 +439,7 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
                     //                    gradient[ind] += rhs.Derivative(ind);
-#ifdef USE_COMLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ind] += rhs.ComplexStepValue(ind, H_V).imag() / H_V;
 #else
                     gradient[ind] += rhs.Derivative(ind);
@@ -455,7 +482,7 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
                     //                    gradient[ind] += rhs.Derivative(ind);
-#ifdef USE_COMLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ind] += rhs.ComplexStepValue(ind, H_V).imag() / H_V;
 #else
                     gradient[ind] += rhs.Derivative(ind);
@@ -499,7 +526,7 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
                     //                    gradient[ind] -= rhs.Derivative(ind);
-#ifdef USE_COMLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ind] -= rhs.ComplexStepValue(ind, H_V).imag() / H_V;
 #else
                     gradient[ind] -= rhs.Derivative(ind);
@@ -540,7 +567,7 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     ind = ids[i];
                     //                    gradient[ind] -= rhs.Derivative(ind);
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     gradient[ind] -= rhs.ComplexStepValue(ind, H_V).imag() / H_V;
 #else
                     gradient[ind] -= rhs.Derivative(ind);
@@ -582,7 +609,7 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     REAL_T& dx = gradient[ids[i]];
                     //                    dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ids[i]));
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     dx = (dx * rhs.GetValue() + GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V);
 #else
                     dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ids[i]));
@@ -621,7 +648,7 @@ namespace et4ad {
                     ind = ids[i];
                     REAL_T& dx = gradient[ind];
                     //                    dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ind));
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     dx = (dx * rhs.GetValue() + GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V);
 #else
                     dx = (dx * rhs.GetValue() + GetValue() * rhs.Derivative(ind));
@@ -666,7 +693,7 @@ namespace et4ad {
                     ind = ids[i];
                     REAL_T& dx = gradient[ind];
                     //                    dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ind)) / (rhs.GetValue() * rhs.GetValue());
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     dx = (dx * rhs.GetValue() - GetValue() * rhs.ComplexStepValue(ind, H_V).imag() / H_V) / (rhs.GetValue() * rhs.GetValue());
 #else
                     dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ind)) / (rhs.GetValue() * rhs.GetValue());
@@ -706,7 +733,7 @@ namespace et4ad {
                 for (i = 0; i < size; i++) {
                     REAL_T& dx = gradient[ids[i]];
                     //                    dx = (dx * rhs.GetValue() - GetValue() * rhs.Derivative(ids[i])) / (rhs.GetValue() * rhs.GetValue());
-#ifdef USE_COMPLEX_STEP
+#ifdef USE_COMPLEX_STEP_DIFFERNTIATION
                     dx = (dx * rhs.GetValue() - GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V) / (rhs.GetValue() * rhs.GetValue());
 #else
                     dx = (dx * rhs.GetValue() - GetValue() * rhs.ComplexStepValue(ids[i], H_V).imag() / H_V) / (rhs.GetValue() * rhs.GetValue());

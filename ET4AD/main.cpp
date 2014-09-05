@@ -19,6 +19,10 @@ T F(const T& x, const T& y) {
 }
 
 int main(int argc, char** argv) {
+
+    
+    std::cout<<1.0/H_V<<"\n";
+//    exit(0);
 //    double h = .00000000000001;
 //    std::complex<double> x(M_PI / 4.0, h);
 //    std::complex<double> y(M_PI / 2.0);
@@ -79,8 +83,10 @@ int main(int argc, char** argv) {
 //        //    s.Add(-std::sin(y),1,0);
 //        //    std::cout<<s.adjoint(2)<<"\n";
 //        //    
-    srand (time(NULL));
-        int SIZE = 200000;
+//    srand (time(NULL));
+            srand (40909012);
+
+        int SIZE = 5000;
         std::vector<et4ad::Variable<Real >* > params;
         et4ad::Variable<Real > xv;
         xv.SetAsIndependent(true);
@@ -112,6 +118,7 @@ int main(int argc, char** argv) {
 //            for (int j = 0; j < params.size(); j++) {
     //            for (int k = 0; k < params.size(); k++) {
                 double d = zv.WRT(*params[i]);
+                std::cout<<d<<" ";
     //            std::cout<<zv.WRT(*params[i]).WRT(*params[j])<<" ";
     //        }
     //        std::cout<<"\n";
