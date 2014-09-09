@@ -662,6 +662,7 @@ namespace et4ad2 {
                 }
             }
             SetValue(GetValue() - rhs.GetValue());
+            return *this
         }
 
         DefaultVariable& operator-=(const REAL_T & rhs) {
@@ -927,9 +928,9 @@ namespace et4ad2 {
         const REAL_T WRT(const et4ad::ExpressionBase<REAL_T, T> &x) {
             switch (ACCUMULATOR) {
                 case EXPRESSION_LEVEL:
-//                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
-//                        return REAL_T(1.0);
-//                    }
+                    //                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
+                    //                        return REAL_T(1.0);
+                    //                    }
                     return x.GetId() < gsize ? gradient[x.GetId()] : REAL_T(0.0);
 
                 case EXPRESSION_STACK:
@@ -967,9 +968,9 @@ namespace et4ad2 {
 
             switch (ACCUMULATOR) {
                 case EXPRESSION_LEVEL:
-//                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
-//                        return REAL_T(1.0);
-//                    }
+                    //                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
+                    //                        return REAL_T(1.0);
+                    //                    }
                     return x.GetId() < gsize ? gradient[x.GetId()] : REAL_T(0.0);
 
                 case EXPRESSION_STACK:
@@ -1534,6 +1535,12 @@ namespace et4ad2 {
                     stack.pop();
                     stack.push(std::pair<REAL_T, REAL_T > (lhs.first - rhs.first, lhs.second - rhs.second));
 
+                    break;
+                case TIMES_EQUALS:
+                    std::cout<<"Statement handler TIMES_EQUALS not yet implemented!\n";
+                    break;
+                case DIVIDE_EQUALS:
+                    std::cout<<"Statement handler DIVIDE_EQUALS not yet implemented!\n";
                     break;
                 case NONE:
                     std::cout << "nothing to do here.\n";

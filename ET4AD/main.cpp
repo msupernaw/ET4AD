@@ -21,7 +21,7 @@ T F(const T& x, const T& y) {
 
 int main(int argc, char** argv) {
 
-
+//typedef et4ad2::DefaultVariable<double, 0, et4ad2::COMPLEX_STEP> MyVar;
     typedef et4ad2::DefaultVariable<double, 0, et4ad2::EXPRESSION_STACK> MyVar;
 //    typedef et4ad2::DefaultVariable<double> MyVar;
     MyVar vtest;
@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     vtest3 = vtest;//= vtest;
         std::cout<<"sdasd\n";
 
-    vtest3+=vtest;
+    vtest3-=vtest;
     std::cout << vtest3.WRT(vtest) << "\n";
     exit(0);
     std::cout << 1.0 / H_V << "\n";
