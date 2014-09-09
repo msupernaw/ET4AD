@@ -36,12 +36,12 @@ namespace et4ad2 {
     class DefaultVariable;
 
     template<class REAL_T, class T>
-    static const REAL_T DiffValue(const std::vector<Statement<REAL_T> >& statements, const et4ad::ExpressionBase<REAL_T,T> &x);
+    static const REAL_T DiffValue(const std::vector<Statement<REAL_T> >& statements, const et4ad::ExpressionBase<REAL_T, T> &x);
 
     template<class REAL_T, //base type
     int group, //group identifier
     int ACCUMULATOR > //accumulation method
-    class DefaultVariable : public et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group > > {
+    class DefaultVariable : public et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group, ACCUMULATOR > > {
         template<class T> friend struct IDTrait;
         std::vector<REAL_T > gradient;
         mutable et4ad::IDSet ids_set;
@@ -96,8 +96,7 @@ namespace et4ad2 {
             DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g = is_recording_g;
         }
 
-
-        DefaultVariable() : et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group> >(),
+        DefaultVariable() : et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group, ACCUMULATOR> >(),
         gsize(0),
         value_m(0.0),
         min_boundary_m(std::numeric_limits<REAL_T>::min()),
@@ -107,7 +106,7 @@ namespace et4ad2 {
         bounded_m(false) {
         }
 
-        DefaultVariable(const REAL_T &value/*, bool independent = false*/) : et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group> >(0),
+        DefaultVariable(const REAL_T &value/*, bool independent = false*/) : et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group, ACCUMULATOR> >(0),
         gsize(0),
         value_m(value),
         min_boundary_m(std::numeric_limits<REAL_T>::min()),
@@ -115,10 +114,11 @@ namespace et4ad2 {
         is_independent_m(false),
         independent_id_m(0),
         bounded_m(false) {
+
             // SetAsIndependent(independent);
         }
 
-        DefaultVariable(const DefaultVariable<REAL_T> & orig) {
+        DefaultVariable(const DefaultVariable<REAL_T, group, ACCUMULATOR> & orig) {
             gsize = 0;
             bounded_m = orig.bounded_m;
             is_independent_m = orig.is_independent_m;
@@ -267,7 +267,7 @@ namespace et4ad2 {
 
         //operators
 
-        DefaultVariable& operator=(const REAL_T & other) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator=(const REAL_T & other) {
             SetValue(other);
             gradient.resize(0);
             statements.resize(0);
@@ -281,7 +281,7 @@ namespace et4ad2 {
          * @param rhs
          * @return 
          */
-        DefaultVariable& operator=(const DefaultVariable & other) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator=(const DefaultVariable<REAL_T, group, ACCUMULATOR> & other) {
 
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
@@ -349,7 +349,8 @@ namespace et4ad2 {
          * @return 
          */
         template<class T >
-        DefaultVariable& operator=(const et4ad::ExpressionBase<REAL_T, T>& expr) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator=(const et4ad::ExpressionBase<REAL_T, T>& expr) {
+
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
                 expr.PushIds(ids_set);
@@ -410,7 +411,7 @@ namespace et4ad2 {
         }
 
         template<class T >
-        DefaultVariable& operator+=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator+=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
 
 
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
@@ -427,6 +428,8 @@ namespace et4ad2 {
                         size = ids_set.Size();
 
                         for (int i = 0; i < size; i++) {
+                            std::cout << gradient[ids[i]] << "+=" << rhs.Derivative(ids[i]) << "\n";
+
                             gradient[ids[i]] += rhs.Derivative(ids[i]);
                         }
 
@@ -474,7 +477,7 @@ namespace et4ad2 {
             return *this;
         }
 
-        DefaultVariable& operator+=(const DefaultVariable & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator+=(const DefaultVariable & rhs) {
 
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
@@ -490,7 +493,9 @@ namespace et4ad2 {
                         size = ids_set.Size();
 
                         for (int i = 0; i < size; i++) {
+                            std::cout << gradient[ids[i]] << "+=" << rhs.Derivative(ids[i]) << "\n";
                             gradient[ids[i]] += rhs.Derivative(ids[i]);
+                            std::cout << gradient[ids[i]] << "\n";
                         }
 
                         break;
@@ -534,12 +539,12 @@ namespace et4ad2 {
             return *this;
         }
 
-        DefaultVariable& operator+=(const REAL_T & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator+=(const REAL_T & rhs) {
             return *this = (*this +rhs);
         }
 
         template<class T >
-        DefaultVariable& operator-=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator-=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
 
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
@@ -600,7 +605,7 @@ namespace et4ad2 {
             return *this;
         }
 
-        DefaultVariable& operator-=(DefaultVariable & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator-=(DefaultVariable<REAL_T, group, ACCUMULATOR> & rhs) {
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
                 rhs.PushIds(ids_set);
@@ -664,7 +669,7 @@ namespace et4ad2 {
         }
 
         template<class T >
-        DefaultVariable& operator*=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator*=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
 
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
@@ -727,7 +732,7 @@ namespace et4ad2 {
             return *this;
         }
 
-        DefaultVariable& operator*=(const DefaultVariable & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator*=(const DefaultVariable<REAL_T, group, ACCUMULATOR> & rhs) {
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
                 rhs.PushIds(ids_set);
@@ -788,12 +793,12 @@ namespace et4ad2 {
             return *this;
         }
 
-        DefaultVariable& operator*=(const REAL_T & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator*=(const REAL_T & rhs) {
             return *this = (*this * rhs);
         }
 
         template<class T >
-        DefaultVariable& operator/=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator/=(const et4ad::ExpressionBase<REAL_T, T>& rhs) {
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
                 rhs.PushIds(ids_set);
@@ -854,7 +859,7 @@ namespace et4ad2 {
             return *this;
         }
 
-        DefaultVariable& operator/=(const DefaultVariable & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator/=(const DefaultVariable<REAL_T, group, ACCUMULATOR> & rhs) {
             if (DefaultVariable<REAL_T, group, ACCUMULATOR>::is_recording_g) {
 
                 rhs.PushIds(ids_set);
@@ -914,17 +919,17 @@ namespace et4ad2 {
             SetValue(GetValue() / rhs.GetValue());
         }
 
-        DefaultVariable& operator/=(const REAL_T & rhs) {
+        DefaultVariable<REAL_T, group, ACCUMULATOR>& operator/=(const REAL_T & rhs) {
             return *this = (*this / rhs);
         }
 
         template<class T>
-        const REAL_T WRT(const et4ad::ExpressionBase<REAL_T,T> &x) {
+        const REAL_T WRT(const et4ad::ExpressionBase<REAL_T, T> &x) {
             switch (ACCUMULATOR) {
                 case EXPRESSION_LEVEL:
-                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
-                        return REAL_T(1.0);
-                    }
+//                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
+//                        return REAL_T(1.0);
+//                    }
                     return x.GetId() < gsize ? gradient[x.GetId()] : REAL_T(0.0);
 
                 case EXPRESSION_STACK:
@@ -958,13 +963,13 @@ namespace et4ad2 {
         }
 
         template<class T>
-        const REAL_T WRT(const et4ad::ExpressionBase<REAL_T,T> &x) const{
+        const REAL_T WRT(const et4ad::ExpressionBase<REAL_T, T> &x) const {
 
             switch (ACCUMULATOR) {
                 case EXPRESSION_LEVEL:
-                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
-                        return REAL_T(1.0);
-                    }
+//                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
+//                        return REAL_T(1.0);
+//                    }
                     return x.GetId() < gsize ? gradient[x.GetId()] : REAL_T(0.0);
 
                 case EXPRESSION_STACK:
@@ -1200,12 +1205,9 @@ namespace et4ad2 {
 
         inline void PushStatements(std::vector<Statement<REAL_T> > &other) const {
             if (statements.size() == 0) {
-               
                 statements.push_back(Statement<REAL_T > (VARIABLE, GetValue(), this->id_m));
-                 std::cout<<this->id_m<<"-->"<<statements.front()<<"\n";
-                
-            } 
-               other.insert(other.end(), statements.begin(), statements.end());
+            }
+            other.insert(other.end(), statements.begin(), statements.end());
 
         }
 
@@ -1227,7 +1229,7 @@ namespace et4ad2 {
      * @return 
      */
     template<class REAL_T, class T>
-     const REAL_T DiffValue(const std::vector<Statement<REAL_T> >& statements, const et4ad::ExpressionBase<REAL_T,T> &x) {
+    const REAL_T DiffValue(const std::vector<Statement<REAL_T> >& statements, const et4ad::ExpressionBase<REAL_T, T> &x) {
 
         if (statements.size() == 0 || x.GetId() == 0) {
             return 0.0;
@@ -1256,15 +1258,12 @@ namespace et4ad2 {
                     stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0.0)));
                     break;
                 case VARIABLE:
-                    std::cout<<statements[i].value_m<<" , "<<statements[i].id_m<<"\n";
                     if (statements[i].id_m == x.GetId()) {
                         stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(1.0)));
-                        std::cout<<"push iv";
                     } else {//constant
                         //f(x) = C
                         //f'(x) = 0
                         stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(0.0)));
-std::cout<<"push dv";
                     }
 
                     break;
@@ -1527,7 +1526,6 @@ std::cout<<"push dv";
                     lhs = stack.top();
                     stack.pop();
                     stack.push(std::pair<REAL_T, REAL_T > (lhs.first + rhs.first, lhs.second + rhs.second));
-std::cout<<"+="<<lhs.second + rhs.second<<"\n";
                     break;
                 case MINUS_EQUALS:
                     rhs = stack.top();
@@ -1535,7 +1533,7 @@ std::cout<<"+="<<lhs.second + rhs.second<<"\n";
                     lhs = stack.top();
                     stack.pop();
                     stack.push(std::pair<REAL_T, REAL_T > (lhs.first - rhs.first, lhs.second - rhs.second));
-                    
+
                     break;
                 case NONE:
                     std::cout << "nothing to do here.\n";
