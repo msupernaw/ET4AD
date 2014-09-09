@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 //    srand (time(NULL));
             srand (40909012);
 
-        int SIZE = 5000;
+        int SIZE = 50;
         std::vector<et4ad::Variable<Real >* > params;
         et4ad::Variable<Real > xv;
         xv.SetAsIndependent(true);
@@ -113,11 +113,12 @@ int main(int argc, char** argv) {
 //            std::cout<<i<<"\n";
             zv += std::exp(v[i]);
         }
+        std::setprecision(100);
     //    std::cout<<zv.WRT(yv)<<"\n";
         for (int i = 0; i < params.size(); i++) {
 //            for (int j = 0; j < params.size(); j++) {
     //            for (int k = 0; k < params.size(); k++) {
-                double d = zv.WRT(*params[i]);
+                Real d = zv.WRT(*params[i]);
                 std::cout<<d<<" ";
     //            std::cout<<zv.WRT(*params[i]).WRT(*params[j])<<" ";
     //        }

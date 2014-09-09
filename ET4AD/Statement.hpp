@@ -45,6 +45,10 @@ enum Operation {
     CEIL,
     CONSTANT,
     VARIABLE,
+    PLUS_EQUALS,
+    MINUS_EQUALS,
+    TIMES_EQUALS,
+    DIVIDE,EQUALS,
     NONE
 };
 

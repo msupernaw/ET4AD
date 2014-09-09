@@ -15,6 +15,7 @@
 #include <fstream>
 
 
+
 #define H_V 1.0E-20
 
 //#define USE_COMPLEX_STEP_DIFFERNTIATION
@@ -32,19 +33,29 @@
 namespace et4ad {
 
 #ifdef ET4AD_TEST_AND_VERIFY
-    
+
     std::ofstream et4ad_test_and_verify_log("et4ad_derivative_test.log");
+
     template <class REAL_T>
-    static void Derivative_Test( const REAL_T& a, const REAL_T& b,char* func ="not supplied"){
-        
-        if(!(std::trunc(ET4AD_TEST_AND_VERIFY_PRECISION*a)== std::trunc(ET4AD_TEST_AND_VERIFY_PRECISION*b))){
+    static void Derivative_Test(const REAL_T& a, const REAL_T& b, char* func = "not supplied") {
+
+        if (!(std::trunc(ET4AD_TEST_AND_VERIFY_PRECISION * a) == std::trunc(ET4AD_TEST_AND_VERIFY_PRECISION * b))) {
             et4ad_test_and_verify_log.precision(50);
-            et4ad_test_and_verify_log<<"derivative test failed from function \""<<func<<"\": "<<a<<" != "<<b<<"\n";
+            et4ad_test_and_verify_log << "derivative test failed from function \"" << func << "\": " << a << " != " << b << "\n";
         }
     }
-    
+
 #endif
-    
+
+    template<class T>
+    bool operator<(const std::complex<T>& a, const std::complex<T>& b) {
+        return a.real() < b.real();
+    }
+
+    template<class T>
+    bool operator>(const std::complex<T>& a, const std::complex<T>& b) {
+        return a.real() > b.real();
+    }
 
 
     template<class REAL_T, //base type
@@ -822,645 +833,6 @@ namespace et4ad {
         }
 
         /**
-         * Returns a variable that is the derivative w.r.t x.
-         * Requires support for arbitrary. see SetSupportingArbitraryOrder(bool)
-         * 
-         * @param x
-         * @return 
-         */
-        const REAL_T DiffV(const Variable<REAL_T> &x) {
-            if (statements.size() == 0) {
-                return 0.0;
-            }
-            std::vector<std::pair<REAL_T, REAL_T > > v;
-            v.reserve(statements.size());
-            std::stack<std::pair<REAL_T, REAL_T >,
-                    std::vector<std::pair<REAL_T, REAL_T > > > stack;
-            //            ad::Stack<std::pair<T, T> > stack;
-            bool found = false;
-            int size = statements.size();
-            std::pair<REAL_T, REAL_T > lhs = std::pair<REAL_T, REAL_T > (0, 0);
-            std::pair<REAL_T, REAL_T > rhs = std::pair<REAL_T, REAL_T > (0, 0);
-
-            for (int i = 0; i < size; i++) {
-
-
-
-                REAL_T temp = REAL_T(0);
-
-
-                switch (statements[i].op_m) {
-
-                    case CONSTANT:
-                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0.0)));
-                        break;
-                    case VARIABLE:
-                        if (statements[i].id_m == x.GetId()) {
-                            found = true;
-                            stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(1.0)));
-
-                        } else {//constant
-                            //f(x) = C
-                            //f'(x) = 0
-                            stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(0.0)));
-
-                        }
-
-                        break;
-                    case PLUS:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        stack.push(std::pair<REAL_T, REAL_T > (lhs.first + rhs.first, lhs.second + rhs.second));
-
-                        break;
-                    case MINUS:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        stack.push(std::pair<REAL_T, REAL_T > (lhs.first - rhs.first, lhs.second - rhs.second));
-
-                        break;
-                    case MULTIPLY:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        temp = lhs.second * rhs.first + lhs.first * rhs.second;
-
-
-                        stack.push(std::pair<REAL_T, REAL_T > (lhs.first * rhs.first, temp));
-
-                        break;
-                    case DIVIDE:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        temp = (lhs.second * rhs.first - lhs.first * rhs.second) / (rhs.first * rhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (lhs.first / rhs.first, temp));
-
-                        break;
-
-                    case SIN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::sin(lhs.first), lhs.second * std::cos(lhs.first)));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::sin(lhs.first), 0));
-                        }
-
-                        break;
-                    case COS:
-
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::cos(lhs.first), lhs.second * (-1.0) * std::sin(lhs.first)));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::cos(lhs.first), 0));
-                        }
-
-                        break;
-                    case TAN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * ((1.0 / std::cos(lhs.first))*(1.0 / std::cos(lhs.first)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::tan(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::tan(lhs.first), 0));
-                        }
-
-                        break;
-                    case ASIN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * 1.0 / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::asin(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::asin(lhs.first), 0));
-                        }
-
-                        break;
-                    case ACOS:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * (-1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::acos(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::acos(lhs.first), (0)));
-                        }
-
-                        break;
-                    case ATAN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * (1.0) / (lhs.first * lhs.first + (1.0)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::atan(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::atan(lhs.first), (0)));
-                        }
-
-                        break;
-                    case ATAN2:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (rhs.first * lhs.second / (lhs.first * lhs.first + (rhs.first * rhs.first)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::atan2(lhs.first, rhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::atan2(lhs.first, rhs.first), (0)));
-                        }
-
-                        break;
-                    case SQRT:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * (.5) / std::sqrt(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::sqrt(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::sqrt(lhs.first), (0)));
-                        }
-
-                        break;
-                    case POW:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * rhs.first) *
-                                    std::pow(lhs.first, (rhs.first - static_cast<REAL_T> (1.0)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::pow(lhs.first, rhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::pow(lhs.first, rhs.first), (0)));
-                        }
-
-                        break;
-                    case LOG:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * ((1.0))) / lhs.first;
-                            stack.push(std::pair<REAL_T, REAL_T > (std::log(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::log(lhs.first), (0)));
-                        }
-
-                        break;
-                    case LOG10:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * (1.0)) / (lhs.first * std::log((10.0)));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::log10(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::log10(lhs.first), (0)));
-                        }
-
-                        break;
-                    case EXP:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::exp(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::exp(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::exp(lhs.first), (0)));
-                        }
-
-                        break;
-                    case MFEXP:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::mfexp(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::mfexp(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::mfexp(lhs.first), (0)));
-                        }
-
-                        break;
-                    case SINH:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::cosh(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::sinh(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::sinh(lhs.first), (0)));
-                        }
-
-                        break;
-                    case COSH:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::sinh(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::cosh(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::cosh(lhs.first), (0)));
-                        }
-
-                        break;
-                    case TANH:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * ((1.0) / std::cosh(lhs.first))*((1.0) / std::cosh(lhs.first));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::tanh(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::tanh(lhs.first), (0)));
-                        }
-
-                        break;
-                    case FABS:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * lhs.first) /
-                                    std::fabs(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), (0)));
-                        }
-
-                        break;
-                    case ABS:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * lhs.first) /
-                                    std::fabs(lhs.first);
-                            stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), (0)));
-                        }
-
-                        break;
-                    case FLOOR:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-
-                            temp = (0); //lhs.second * T(std::floor(lhs.first));
-                            stack.push(std::pair<REAL_T, REAL_T > (std::floor(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<REAL_T, REAL_T > (std::floor(lhs.first), (0)));
-                        }
-
-                        break;
-                    case NONE:
-                        std::cout << "nothing to do here.\n";
-                        break;
-                    default:
-                        break;
-
-                }
-
-
-            }
-
-            //            std::cout << "returning " << stack.top().second << "\n\n";
-            return stack.top().second;
-        }
-
-        /**
-         * Returns a variable that is the derivative w.r.t x.
-         * Requires support for arbitrary. see SetSupportingArbitraryOrder(bool)
-         * 
-         * @param x
-         * @return 
-         */
-        const Variable<REAL_T> Diff(const Variable<REAL_T> &x) {
-            if (statements.size() == 0) {
-                return 0.0;
-            }
-            std::vector<std::pair<Variable<REAL_T>, Variable<REAL_T> > > v;
-            v.reserve(statements.size()*200);
-            std::stack<std::pair<Variable<REAL_T>, Variable<REAL_T> >,
-                    std::vector<std::pair<Variable<REAL_T>, Variable<REAL_T> > > > stack(v);
-            //                        et4ad::Stack<std::pair<Variable<REAL_T>, Variable<REAL_T> > > stack;
-            bool found = false;
-            int size = statements.size();
-            std::pair<Variable<REAL_T>, Variable<REAL_T> > lhs = std::pair<Variable<REAL_T>, Variable<REAL_T> > (0, 0);
-            std::pair<Variable<REAL_T>, Variable<REAL_T> > rhs = std::pair<Variable<REAL_T>, Variable<REAL_T> > (0, 0);
-
-
-            Variable<REAL_T> temp;
-            for (int i = 0; i < size; i++) {
-
-
-                temp = 0.0;
-
-                switch (statements[i].op_m) {
-
-                    case CONSTANT:
-                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (statements[i].value_m, 0.0));
-                        break;
-                    case VARIABLE:
-                        if (statements[i].id_m == x.GetId()) {
-                            found = true;
-                            //f(x) = x
-                            //f'(x) = 1
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (statements[i].value_m, 1.0));
-                            stack.top().first.value_m = statements[i].value_m;
-                            stack.top().first.id_m = statements[i].id_m;
-                            stack.top().first.independent_id_m = statements[i].id_m;
-                            stack.top().first.is_independent_m = true;
-                        } else {//constant
-                            //f(x) = C
-                            //f'(x) = 0
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (statements[i].value_m, 0.0));
-                            stack.top().first.value_m = statements[i].value_m;
-                            stack.top().first.id_m = statements[i].id_m;
-                            stack.top().first.independent_id_m = statements[i].id_m;
-                            if (statements[i].id_m > 0) {
-                                stack.top().first.is_independent_m = true;
-                            }
-                        }
-
-                        break;
-                    case PLUS:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first + rhs.first, lhs.second + rhs.second));
-
-                        break;
-                    case MINUS:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first - rhs.first, lhs.second - rhs.second));
-
-
-                        break;
-                    case MULTIPLY:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        temp = lhs.second * rhs.first + lhs.first * rhs.second;
-
-                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first * rhs.first, temp));
-
-                        break;
-                    case DIVIDE:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-
-                        temp = (lhs.second * rhs.first - lhs.first * rhs.second) / (rhs.first * rhs.first);
-                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first / rhs.first, temp));
-                        break;
-
-                    case SIN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sin(lhs.first), lhs.second * std::cos(lhs.first)));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sin(lhs.first), 0));
-                        }
-
-                        break;
-                    case COS:
-
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cos(lhs.first), lhs.second * (static_cast<REAL_T> (-1.0)) * std::sin(lhs.first)));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cos(lhs.first), 0));
-                        }
-
-                        break;
-                    case TAN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * ((static_cast<REAL_T> (1.0) / std::cos(lhs.first))*(static_cast<REAL_T> (1.0) / std::cos(lhs.first)));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tan(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tan(lhs.first), 0));
-                        }
-
-                        break;
-                    case ASIN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * static_cast<REAL_T> (1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::asin(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::asin(lhs.first), 0));
-                        }
-
-                        break;
-                    case ACOS:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * (static_cast<REAL_T> (-1.0)) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::acos(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::acos(lhs.first), (0)));
-                        }
-
-                        break;
-                    case ATAN:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * static_cast<REAL_T> ((1.0)) / (lhs.first * lhs.first + static_cast<REAL_T> ((1.0))));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan(lhs.first), (0)));
-                        }
-
-                        break;
-                    case ATAN2:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (rhs.first * lhs.second / (lhs.first * lhs.first + (rhs.first * rhs.first)));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan2(lhs.first, rhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan2(lhs.first, rhs.first), (0)));
-                        }
-
-                        break;
-                    case SQRT:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * static_cast<REAL_T> ((.5)) / std::sqrt(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sqrt(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sqrt(lhs.first), (0)));
-                        }
-
-                        break;
-                    case POW:
-                        rhs = stack.top();
-                        stack.pop();
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * rhs.first) *
-                                    std::pow(lhs.first, (rhs.first - static_cast<REAL_T> (1.0)));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::pow(lhs.first, rhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::pow(lhs.first, rhs.first), (0)));
-                        }
-
-                        break;
-                    case LOG:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * (Constant<REAL_T > (1.0))) / lhs.first;
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log(lhs.first), (0)));
-                        }
-
-                        break;
-                    case LOG10:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * static_cast<REAL_T> ((1.0))) / (lhs.first * std::log(static_cast<REAL_T> ((10.0))));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log10(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log10(lhs.first), (0)));
-                        }
-
-                        break;
-                    case EXP:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::exp(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::exp(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::exp(lhs.first), (0)));
-                        }
-
-                        break;
-                    case MFEXP:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::mfexp(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::mfexp(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::mfexp(lhs.first), (0)));
-                        }
-
-                        break;
-                    case SINH:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::cosh(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sinh(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sinh(lhs.first), (0)));
-                        }
-
-                        break;
-                    case COSH:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * std::sinh(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cosh(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cosh(lhs.first), (0)));
-                        }
-
-                        break;
-                    case TANH:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = lhs.second * (static_cast<REAL_T> ((1.0)) / std::cosh(lhs.first))*(static_cast<REAL_T> ((1.0)) / std::cosh(lhs.first));
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tanh(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tanh(lhs.first), (0)));
-                        }
-
-                        break;
-                    case FABS:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * lhs.first) /
-                                    std::fabs(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), (0)));
-                        }
-
-                        break;
-                    case ABS:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-                            temp = (lhs.second * lhs.first) /
-                                    std::fabs(lhs.first);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), (0)));
-                        }
-
-                        break;
-                    case FLOOR:
-                        lhs = stack.top();
-                        stack.pop();
-                        if (found) {
-
-                            temp = (0);
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::floor(lhs.first), temp));
-                        } else {
-                            stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::floor(lhs.first), (0)));
-                        }
-
-                        break;
-                    case NONE:
-                        std::cout << "nothing to do here.\n";
-                        break;
-                    default:
-                        break;
-
-                }
-
-
-
-            }
-
-
-            return stack.top().second;
-        }
-
-        /**
          * Returns the name of this variable. Names are not initialized and 
          * if it is not set this function will return a empty string.
          * @return 
@@ -1709,6 +1081,646 @@ namespace et4ad {
 
     };
 
+    /**
+     * Returns a variable that is the derivative w.r.t x.
+     * Requires support for arbitrary. see SetSupportingArbitraryOrder(bool)
+     * 
+     * @param x
+     * @return 
+     */
+    template<class REAL_T>
+    static const REAL_T DiffV(const std::vector<Statement<REAL_T> >& statements, const Variable<REAL_T> &x) {
+        if (statements.size() == 0) {
+            return 0.0;
+        }
+        std::vector<std::pair<REAL_T, REAL_T > > v;
+        v.reserve(statements.size());
+        std::stack<std::pair<REAL_T, REAL_T >,
+                std::vector<std::pair<REAL_T, REAL_T > > > stack;
+        //            ad::Stack<std::pair<T, T> > stack;
+        bool found = false;
+        int size = statements.size();
+        std::pair<REAL_T, REAL_T > lhs = std::pair<REAL_T, REAL_T > (0, 0);
+        std::pair<REAL_T, REAL_T > rhs = std::pair<REAL_T, REAL_T > (0, 0);
+
+        for (int i = 0; i < size; i++) {
+
+
+
+            REAL_T temp = REAL_T(0);
+
+
+            switch (statements[i].op_m) {
+
+                case CONSTANT:
+                    stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0.0)));
+                    break;
+                case VARIABLE:
+                    if (statements[i].id_m == x.GetId()) {
+                        found = true;
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(1.0)));
+
+                    } else {//constant
+                        //f(x) = C
+                        //f'(x) = 0
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(0.0)));
+
+                    }
+
+                    break;
+                case PLUS:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first + rhs.first, lhs.second + rhs.second));
+
+                    break;
+                case MINUS:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first - rhs.first, lhs.second - rhs.second));
+
+                    break;
+                case MULTIPLY:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    temp = lhs.second * rhs.first + lhs.first * rhs.second;
+
+
+                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first * rhs.first, temp));
+
+                    break;
+                case DIVIDE:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    temp = (lhs.second * rhs.first - lhs.first * rhs.second) / (rhs.first * rhs.first);
+                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first / rhs.first, temp));
+
+                    break;
+
+                case SIN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::sin(lhs.first), lhs.second * std::cos(lhs.first)));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::sin(lhs.first), 0));
+                    }
+
+                    break;
+                case COS:
+
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::cos(lhs.first), lhs.second * (-1.0) * std::sin(lhs.first)));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::cos(lhs.first), 0));
+                    }
+
+                    break;
+                case TAN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * ((1.0 / std::cos(lhs.first))*(1.0 / std::cos(lhs.first)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::tan(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::tan(lhs.first), 0));
+                    }
+
+                    break;
+                case ASIN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * 1.0 / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::asin(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::asin(lhs.first), 0));
+                    }
+
+                    break;
+                case ACOS:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * (-1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::acos(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::acos(lhs.first), (0)));
+                    }
+
+                    break;
+                case ATAN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * (1.0) / (lhs.first * lhs.first + (1.0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::atan(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::atan(lhs.first), (0)));
+                    }
+
+                    break;
+                case ATAN2:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (rhs.first * lhs.second / (lhs.first * lhs.first + (rhs.first * rhs.first)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::atan2(lhs.first, rhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::atan2(lhs.first, rhs.first), (0)));
+                    }
+
+                    break;
+                case SQRT:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * (.5) / std::sqrt(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::sqrt(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::sqrt(lhs.first), (0)));
+                    }
+
+                    break;
+                case POW:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * rhs.first) *
+                                std::pow(lhs.first, (rhs.first - static_cast<REAL_T> (1.0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::pow(lhs.first, rhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::pow(lhs.first, rhs.first), (0)));
+                    }
+
+                    break;
+                case LOG:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * ((1.0))) / lhs.first;
+                        stack.push(std::pair<REAL_T, REAL_T > (std::log(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::log(lhs.first), (0)));
+                    }
+
+                    break;
+                case LOG10:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * (1.0)) / (lhs.first * std::log((10.0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::log10(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::log10(lhs.first), (0)));
+                    }
+
+                    break;
+                case EXP:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::exp(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::exp(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::exp(lhs.first), (0)));
+                    }
+
+                    break;
+                case MFEXP:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::mfexp(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::mfexp(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::mfexp(lhs.first), (0)));
+                    }
+
+                    break;
+                case SINH:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::cosh(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::sinh(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::sinh(lhs.first), (0)));
+                    }
+
+                    break;
+                case COSH:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::sinh(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::cosh(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::cosh(lhs.first), (0)));
+                    }
+
+                    break;
+                case TANH:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * ((1.0) / std::cosh(lhs.first))*((1.0) / std::cosh(lhs.first));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::tanh(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::tanh(lhs.first), (0)));
+                    }
+
+                    break;
+                case FABS:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * lhs.first) /
+                                std::fabs(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), (0)));
+                    }
+
+                    break;
+                case ABS:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * lhs.first) /
+                                std::fabs(lhs.first);
+                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), (0)));
+                    }
+
+                    break;
+                case FLOOR:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+
+                        temp = (0); //lhs.second * T(std::floor(lhs.first));
+                        stack.push(std::pair<REAL_T, REAL_T > (std::floor(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<REAL_T, REAL_T > (std::floor(lhs.first), (0)));
+                    }
+
+                    break;
+                case NONE:
+                    std::cout << "nothing to do here.\n";
+                    break;
+                default:
+                    break;
+
+            }
+
+
+        }
+
+        //            std::cout << "returning " << stack.top().second << "\n\n";
+        return stack.top().second;
+    }
+
+    /**
+     * Returns a variable that is the derivative w.r.t x.
+     * Requires support for arbitrary. see SetSupportingArbitraryOrder(bool)
+     * 
+     * @param x
+     * @return 
+     */
+    template<class REAL_T>
+    static Variable<REAL_T> Diff(const std::vector<Statement<REAL_T> >& statements, const Variable<REAL_T> &x) {
+        if (statements.size() == 0) {
+            return 0.0;
+        }
+        std::vector<std::pair<Variable<REAL_T>, Variable<REAL_T> > > v;
+        v.reserve(statements.size()*200);
+        std::stack<std::pair<Variable<REAL_T>, Variable<REAL_T> >,
+                std::vector<std::pair<Variable<REAL_T>, Variable<REAL_T> > > > stack(v);
+        //                        et4ad::Stack<std::pair<Variable<REAL_T>, Variable<REAL_T> > > stack;
+        bool found = false;
+        int size = statements.size();
+        std::pair<Variable<REAL_T>, Variable<REAL_T> > lhs = std::pair<Variable<REAL_T>, Variable<REAL_T> > (0, 0);
+        std::pair<Variable<REAL_T>, Variable<REAL_T> > rhs = std::pair<Variable<REAL_T>, Variable<REAL_T> > (0, 0);
+
+
+        Variable<REAL_T> temp;
+        for (int i = 0; i < size; i++) {
+
+
+            temp = 0.0;
+
+            switch (statements[i].op_m) {
+
+                case CONSTANT:
+                    stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (statements[i].value_m, 0.0));
+                    break;
+                case VARIABLE:
+                    if (statements[i].id_m == x.GetId()) {
+                        found = true;
+                        //f(x) = x
+                        //f'(x) = 1
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (statements[i].value_m, 1.0));
+                        stack.top().first.value_m = statements[i].value_m;
+                        stack.top().first.id_m = statements[i].id_m;
+                        stack.top().first.independent_id_m = statements[i].id_m;
+                        stack.top().first.is_independent_m = true;
+                    } else {//constant
+                        //f(x) = C
+                        //f'(x) = 0
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (statements[i].value_m, 0.0));
+                        stack.top().first.value_m = statements[i].value_m;
+                        stack.top().first.id_m = statements[i].id_m;
+                        stack.top().first.independent_id_m = statements[i].id_m;
+                        if (statements[i].id_m > 0) {
+                            stack.top().first.is_independent_m = true;
+                        }
+                    }
+
+                    break;
+                case PLUS:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first + rhs.first, lhs.second + rhs.second));
+
+                    break;
+                case MINUS:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first - rhs.first, lhs.second - rhs.second));
+
+
+                    break;
+                case MULTIPLY:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    temp = lhs.second * rhs.first + lhs.first * rhs.second;
+
+                    stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first * rhs.first, temp));
+
+                    break;
+                case DIVIDE:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+
+                    temp = (lhs.second * rhs.first - lhs.first * rhs.second) / (rhs.first * rhs.first);
+                    stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (lhs.first / rhs.first, temp));
+                    break;
+
+                case SIN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sin(lhs.first), lhs.second * std::cos(lhs.first)));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sin(lhs.first), 0));
+                    }
+
+                    break;
+                case COS:
+
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cos(lhs.first), lhs.second * (static_cast<REAL_T> (-1.0)) * std::sin(lhs.first)));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cos(lhs.first), 0));
+                    }
+
+                    break;
+                case TAN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * ((static_cast<REAL_T> (1.0) / std::cos(lhs.first))*(static_cast<REAL_T> (1.0) / std::cos(lhs.first)));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tan(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tan(lhs.first), 0));
+                    }
+
+                    break;
+                case ASIN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * static_cast<REAL_T> (1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::asin(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::asin(lhs.first), 0));
+                    }
+
+                    break;
+                case ACOS:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * (static_cast<REAL_T> (-1.0)) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::acos(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::acos(lhs.first), (0)));
+                    }
+
+                    break;
+                case ATAN:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * static_cast<REAL_T> ((1.0)) / (lhs.first * lhs.first + static_cast<REAL_T> ((1.0))));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan(lhs.first), (0)));
+                    }
+
+                    break;
+                case ATAN2:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (rhs.first * lhs.second / (lhs.first * lhs.first + (rhs.first * rhs.first)));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan2(lhs.first, rhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::atan2(lhs.first, rhs.first), (0)));
+                    }
+
+                    break;
+                case SQRT:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * static_cast<REAL_T> ((.5)) / std::sqrt(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sqrt(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sqrt(lhs.first), (0)));
+                    }
+
+                    break;
+                case POW:
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * rhs.first) *
+                                std::pow(lhs.first, (rhs.first - static_cast<REAL_T> (1.0)));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::pow(lhs.first, rhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::pow(lhs.first, rhs.first), (0)));
+                    }
+
+                    break;
+                case LOG:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * (Constant<REAL_T > (1.0))) / lhs.first;
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log(lhs.first), (0)));
+                    }
+
+                    break;
+                case LOG10:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * static_cast<REAL_T> ((1.0))) / (lhs.first * std::log(static_cast<REAL_T> ((10.0))));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log10(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::log10(lhs.first), (0)));
+                    }
+
+                    break;
+                case EXP:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::exp(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::exp(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::exp(lhs.first), (0)));
+                    }
+
+                    break;
+                case MFEXP:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::mfexp(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::mfexp(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::mfexp(lhs.first), (0)));
+                    }
+
+                    break;
+                case SINH:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::cosh(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sinh(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::sinh(lhs.first), (0)));
+                    }
+
+                    break;
+                case COSH:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * std::sinh(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cosh(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::cosh(lhs.first), (0)));
+                    }
+
+                    break;
+                case TANH:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = lhs.second * (static_cast<REAL_T> ((1.0)) / std::cosh(lhs.first))*(static_cast<REAL_T> ((1.0)) / std::cosh(lhs.first));
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tanh(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::tanh(lhs.first), (0)));
+                    }
+
+                    break;
+                case FABS:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * lhs.first) /
+                                std::fabs(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), (0)));
+                    }
+
+                    break;
+                case ABS:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+                        temp = (lhs.second * lhs.first) /
+                                std::fabs(lhs.first);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::fabs(lhs.first), (0)));
+                    }
+
+                    break;
+                case FLOOR:
+                    lhs = stack.top();
+                    stack.pop();
+                    if (found) {
+
+                        temp = (0);
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::floor(lhs.first), temp));
+                    } else {
+                        stack.push(std::pair<Variable<REAL_T>, Variable<REAL_T> > (std::floor(lhs.first), (0)));
+                    }
+
+                    break;
+                case NONE:
+                    std::cout << "nothing to do here.\n";
+                    break;
+                default:
+                    break;
+
+            }
+
+
+
+        }
+
+
+        return stack.top().second;
+    }
 
 
 }
