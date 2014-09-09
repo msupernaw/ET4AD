@@ -7,6 +7,7 @@
       <itemPath>Chain.hpp</itemPath>
       <itemPath>Complex.hpp</itemPath>
       <itemPath>Statement.hpp</itemPath>
+      <itemPath>Variable2.hpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -196,6 +197,8 @@
       </item>
       <item path="Variable.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Variable2.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="VariableStorage.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
@@ -327,6 +330,8 @@
       <item path="Traits.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Variable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Variable2.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="VariableStorage.hpp" ex="false" tool="3" flavor2="0">
       </item>

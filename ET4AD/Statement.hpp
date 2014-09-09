@@ -7,7 +7,7 @@
 
 #ifndef ET4AD_STATEMENT_HPP
 #define	ET4AD_STATEMENT_HPP
-
+#include <iostream>
 /**
  * Operation values used for recording expressions into a post-order 
  * expression tree. These operations are used primarily for supporting 
@@ -48,7 +48,7 @@ enum Operation {
     PLUS_EQUALS,
     MINUS_EQUALS,
     TIMES_EQUALS,
-    DIVIDE,EQUALS,
+    DIVIDE_EQUALS,
     NONE
 };
 
@@ -115,6 +115,13 @@ struct Statement {
     uint32_t id_m;
 
 };
+
+
+template<class REAL_T>
+std::ostream& operator<<(std::ostream& out, const Statement<REAL_T> & s){
+    out<<"statement["<<s.op_m<<", "<<s.value_m<<", "<<s.id_m<<"]\n";
+    return out;
+}
 
 #endif	/* STATEMENT_HPP */
 

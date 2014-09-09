@@ -12,6 +12,7 @@
 #include "Chain.hpp"
 #include <vector>
 #include <complex>
+#include "Variable2.hpp"
 
 template<class T>
 T F(const T& x, const T& y) {
@@ -19,8 +20,15 @@ T F(const T& x, const T& y) {
 }
 
 int main(int argc, char** argv) {
-
+    et4ad2::DefaultVariable<double, 0 ,et4ad2::EXPRESSION_STACK> vtest = 1.0;
+     vtest.SetAsIndependent(true);
+    vtest+=vtest;
+   
     
+    et4ad2::DefaultVariable<double,0 ,et4ad2::EXPRESSION_STACK> vtest2 = 2.0;
+     et4ad2::DefaultVariable<double,0 ,et4ad2::EXPRESSION_STACK> vtest3 = vtest+vtest2;
+     std::cout<<vtest3.WRT(vtest)<<"\n";
+     exit(0);
     std::cout<<1.0/H_V<<"\n";
 //    exit(0);
 //    double h = .00000000000001;
