@@ -21,24 +21,24 @@ T F(const T& x, const T& y) {
 
 int main(int argc, char** argv) {
 
-//typedef et4ad2::DefaultVariable<double, 0, et4ad2::COMPLEX_STEP> MyVar;
-    typedef et4ad2::DefaultVariable<double, 0, et4ad2::EXPRESSION_STACK> MyVar;
-//    typedef et4ad2::DefaultVariable<double> MyVar;
+    //typedef et4ad2::DefaultVariable<double, 0, et4ad2::COMPLEX_STEP> MyVar;
+    typedef et4ad::DefaultVariable<double, 0, et4ad::EXPRESSION_STACK> MyVar;
+    //    typedef et4ad2::DefaultVariable<double> MyVar;
     MyVar vtest;
-    
+
     vtest.SetAsIndependent(true);
     vtest = 1.0;
 
 
     MyVar vtest2 = 2.0;
-    std::cout<<"sdasd\n";
+    std::cout << "sdasd\n";
     MyVar vtest3;
-    vtest3 = vtest;//= vtest;
-        std::cout<<"sdasd\n";
+    vtest3 = vtest; //= vtest;
+    std::cout << "sdasd\n";
 
-    vtest3-=vtest;
+    vtest3 -= vtest;
     std::cout << vtest3.WRT(vtest) << "\n";
-    exit(0);
+    //    exit(0);
     std::cout << 1.0 / H_V << "\n";
     //    exit(0);
     //    double h = .00000000000001;
@@ -84,6 +84,7 @@ int main(int argc, char** argv) {
     //
 
     typedef double Real;
+    typedef et4ad::DefaultVariable<Real, 0, et4ad::EXPRESSION_STACK> var_t;
     //        //    et4ad::Stack<double> s;
     //        //    double x = 3.14;
     //        //    double y = 2.12;
@@ -104,21 +105,21 @@ int main(int argc, char** argv) {
     //    srand (time(NULL));
     srand(40909012);
 
-    int SIZE = 50;
-    std::vector<et4ad::Variable<Real >* > params;
-    et4ad::Variable<Real > xv;
+    int SIZE = 5000;
+    std::vector<var_t* > params;
+    var_t xv;
     xv.SetAsIndependent(true);
     params.push_back(&xv);
     //        std::cout << "id = " << xv.GetValue().GetId() << "\n";
     xv = Real(M_PI / 4.0);
-    et4ad::Variable<Real > yv;
+    var_t yv;
     yv.SetAsIndependent(true);
     yv = Real(M_PI / 2.0);
     params.push_back(&yv);
     std::cout << xv.GetValue() << " - " << yv.GetValue() << "\n";
-    std::vector<et4ad::Variable<Real > > v(SIZE);
+    std::vector<var_t > v(SIZE);
     for (int i = 0; i < SIZE; i++) {
-        v[i] = et4ad::Variable<Real >();
+        v[i] = var_t();
         v[i].SetAsIndependent(true);
         v[i] = Real((double) rand() / (RAND_MAX));
         //            std::cout<<"v["<<i<<"] = "<<v[i].GetValue()<<"\n";
@@ -126,7 +127,7 @@ int main(int argc, char** argv) {
     }
     //    
 
-    et4ad::Variable<Real > zv = std::pow(xv, Real(2.0)) + std::pow(yv, Real(4.0));
+    var_t zv = std::pow(xv, Real(2.0)) + std::pow(yv, Real(4.0));
     for (int i = 0; i < SIZE; i++) {
         //            std::cout<<i<<"\n";
         zv += std::exp(v[i]);

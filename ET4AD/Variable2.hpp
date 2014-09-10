@@ -13,15 +13,15 @@
 #include "IDSet.hpp"
 #include "IDGenerator.hpp"
 
-namespace et4ad2 {
+namespace et4ad {
 
-    template<class T>
-    struct IDTrait {
-
-        void SetId(T& t, uint32_t id) {
-
-        }
-    };
+//    template<class T>
+//    struct IDTrait {
+//
+//        void SetId(T& t, uint32_t id) {
+//
+//        }
+//    };
 
     enum ACCUMULATION_TYPE {
         EXPRESSION_LEVEL = 0,
@@ -187,7 +187,7 @@ namespace et4ad2 {
         }
 
         template<class T >
-        DefaultVariable(const et4ad::ExpressionBase<REAL_T, T>& expr) : et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group> >(0),
+        DefaultVariable(const et4ad::ExpressionBase<REAL_T, T>& expr) : et4ad::ExpressionBase<REAL_T, DefaultVariable<REAL_T, group,ACCUMULATOR> >(0),
         gsize(0),
         value_m(0.0),
         min_boundary_m(std::numeric_limits<REAL_T>::min()),
@@ -429,7 +429,7 @@ namespace et4ad2 {
                         size = ids_set.Size();
 
                         for (int i = 0; i < size; i++) {
-                            std::cout << gradient[ids[i]] << "+=" << rhs.Derivative(ids[i]) << "\n";
+//                            std::cout << gradient[ids[i]] << "+=" << rhs.Derivative(ids[i]) << "\n";
 
                             gradient[ids[i]] += rhs.Derivative(ids[i]);
                         }
@@ -494,9 +494,9 @@ namespace et4ad2 {
                         size = ids_set.Size();
 
                         for (int i = 0; i < size; i++) {
-                            std::cout << gradient[ids[i]] << "+=" << rhs.Derivative(ids[i]) << "\n";
+//                            std::cout << gradient[ids[i]] << "+=" << rhs.Derivative(ids[i]) << "\n";
                             gradient[ids[i]] += rhs.Derivative(ids[i]);
-                            std::cout << gradient[ids[i]] << "\n";
+//                            std::cout << gradient[ids[i]] << "\n";
                         }
 
                         break;
@@ -927,6 +927,7 @@ namespace et4ad2 {
 
         template<class T>
         const REAL_T WRT(const et4ad::ExpressionBase<REAL_T, T> &x) {
+//             std::cout<<"wrt "<<x.GetId()<<"\n";
             switch (ACCUMULATOR) {
                 case EXPRESSION_LEVEL:
                     //                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
@@ -938,7 +939,7 @@ namespace et4ad2 {
                     if (x.GetId() != 0 && x.GetId() == this->id_m) {
                         return REAL_T(1.0);
                     }
-                    return et4ad2::DiffValue<REAL_T>(statements, x);
+                    return et4ad::DiffValue<REAL_T>(statements, x);
                     break;
 
                 case ADJOINT:
@@ -966,7 +967,7 @@ namespace et4ad2 {
 
         template<class T>
         const REAL_T WRT(const et4ad::ExpressionBase<REAL_T, T> &x) const {
-
+            std::cout<<"wrt "<<x.GetId()<<"\n";
             switch (ACCUMULATOR) {
                 case EXPRESSION_LEVEL:
                     //                    if (x.GetId() != 0 && x.GetId() == this->id_m) {
@@ -978,7 +979,7 @@ namespace et4ad2 {
                     if (x.GetId() != 0 && x.GetId() == this->id_m) {
                         return REAL_T(1.0);
                     }
-                    return et4ad2::DiffValue(statements, x);
+                    return et4ad::DiffValue(statements, x);
 
                     break;
 
@@ -1261,6 +1262,7 @@ namespace et4ad2 {
                     break;
                 case VARIABLE:
                     if (statements[i].id_m == x.GetId()) {
+                        found = true;  
                         stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, REAL_T(1.0)));
                     } else {//constant
                         //f(x) = C
@@ -1274,7 +1276,7 @@ namespace et4ad2 {
                     stack.pop();
                     lhs = stack.top();
                     stack.pop();
-                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first + rhs.first, lhs.second + rhs.second));
+                    stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, lhs.second + rhs.second));
 
                     break;
                 case MINUS:
@@ -1282,7 +1284,7 @@ namespace et4ad2 {
                     stack.pop();
                     lhs = stack.top();
                     stack.pop();
-                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first - rhs.first, lhs.second - rhs.second));
+                    stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, lhs.second - rhs.second));
 
                     break;
                 case MULTIPLY:
@@ -1293,7 +1295,7 @@ namespace et4ad2 {
                     temp = lhs.second * rhs.first + lhs.first * rhs.second;
 
 
-                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first * rhs.first, temp));
+                    stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
 
                     break;
                 case DIVIDE:
@@ -1302,7 +1304,7 @@ namespace et4ad2 {
                     lhs = stack.top();
                     stack.pop();
                     temp = (lhs.second * rhs.first - lhs.first * rhs.second) / (rhs.first * rhs.first);
-                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first / rhs.first, temp));
+                    stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
 
                     break;
 
@@ -1310,9 +1312,9 @@ namespace et4ad2 {
                     lhs = stack.top();
                     stack.pop();
                     if (found) {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::sin(lhs.first), lhs.second * std::cos(lhs.first)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, lhs.second * std::cos(lhs.first)));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::sin(lhs.first), 0));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, 0));
                     }
 
                     break;
@@ -1321,9 +1323,9 @@ namespace et4ad2 {
                     lhs = stack.top();
                     stack.pop();
                     if (found) {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::cos(lhs.first), lhs.second * (-1.0) * std::sin(lhs.first)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, lhs.second * (-1.0) * std::sin(lhs.first)));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::cos(lhs.first), 0));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, 0));
                     }
 
                     break;
@@ -1332,9 +1334,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * ((1.0 / std::cos(lhs.first))*(1.0 / std::cos(lhs.first)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::tan(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::tan(lhs.first), 0));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, 0));
                     }
 
                     break;
@@ -1343,9 +1345,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = (lhs.second * 1.0 / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::asin(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::asin(lhs.first), 0));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, 0));
                     }
 
                     break;
@@ -1354,9 +1356,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = (lhs.second * (-1.0) / std::pow((static_cast<REAL_T> (1.0) - std::pow(lhs.first, static_cast<REAL_T> (2.0))), static_cast<REAL_T> (0.5)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::acos(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::acos(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1365,9 +1367,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = (lhs.second * (1.0) / (lhs.first * lhs.first + (1.0)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::atan(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::atan(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1378,9 +1380,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = (rhs.first * lhs.second / (lhs.first * lhs.first + (rhs.first * rhs.first)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::atan2(lhs.first, rhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::atan2(lhs.first, rhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1389,9 +1391,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * (.5) / std::sqrt(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::sqrt(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m,temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::sqrt(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1403,9 +1405,9 @@ namespace et4ad2 {
                     if (found) {
                         temp = (lhs.second * rhs.first) *
                                 std::pow(lhs.first, (rhs.first - static_cast<REAL_T> (1.0)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::pow(lhs.first, rhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::pow(lhs.first, rhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1414,9 +1416,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = (lhs.second * ((1.0))) / lhs.first;
-                        stack.push(std::pair<REAL_T, REAL_T > (std::log(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::log(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m,(0)));
                     }
 
                     break;
@@ -1425,9 +1427,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = (lhs.second * (1.0)) / (lhs.first * std::log((10.0)));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::log10(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m,temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::log10(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1436,9 +1438,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * std::exp(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::exp(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::exp(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1447,9 +1449,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * std::mfexp(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::mfexp(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::mfexp(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1458,9 +1460,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * std::cosh(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::sinh(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::sinh(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1469,9 +1471,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * std::sinh(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::cosh(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::cosh(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1480,9 +1482,9 @@ namespace et4ad2 {
                     stack.pop();
                     if (found) {
                         temp = lhs.second * ((1.0) / std::cosh(lhs.first))*((1.0) / std::cosh(lhs.first));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::tanh(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::tanh(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1492,9 +1494,9 @@ namespace et4ad2 {
                     if (found) {
                         temp = (lhs.second * lhs.first) /
                                 std::fabs(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1504,9 +1506,9 @@ namespace et4ad2 {
                     if (found) {
                         temp = (lhs.second * lhs.first) /
                                 std::fabs(lhs.first);
-                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::fabs(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1516,9 +1518,9 @@ namespace et4ad2 {
                     if (found) {
 
                         temp = (0); //lhs.second * T(std::floor(lhs.first));
-                        stack.push(std::pair<REAL_T, REAL_T > (std::floor(lhs.first), temp));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, temp));
                     } else {
-                        stack.push(std::pair<REAL_T, REAL_T > (std::floor(lhs.first), (0)));
+                        stack.push(std::pair<REAL_T, REAL_T > (statements[i].value_m, (0)));
                     }
 
                     break;
@@ -1538,10 +1540,18 @@ namespace et4ad2 {
 
                     break;
                 case TIMES_EQUALS:
-                    std::cout<<"Statement handler TIMES_EQUALS not yet implemented!\n";
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first * rhs.first, lhs.second*rhs.first + rhs.second*lhs.second));
                     break;
                 case DIVIDE_EQUALS:
-                    std::cout<<"Statement handler DIVIDE_EQUALS not yet implemented!\n";
+                    rhs = stack.top();
+                    stack.pop();
+                    lhs = stack.top();
+                    stack.pop();
+                    stack.push(std::pair<REAL_T, REAL_T > (lhs.first / rhs.first, (lhs.second*rhs.first - rhs.second*lhs.first)/(rhs.first*rhs.first)));
                     break;
                 case NONE:
                     std::cout << "nothing to do here.\n";
