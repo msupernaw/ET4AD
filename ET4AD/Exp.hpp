@@ -100,7 +100,7 @@ namespace et4ad {
 
         inline void PushStatements(std::vector<Statement<REAL_T> > &storage) const {
             expr_m.PushStatements(storage);
-            storage.push_back(Statement<REAL_T > (EXP));
+            storage.push_back(Statement<REAL_T > (EXP, GetValue()));
         }
 
 

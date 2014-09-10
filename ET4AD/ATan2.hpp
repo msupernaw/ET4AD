@@ -139,7 +139,7 @@ namespace et4ad {
         inline void PushStatements(std::vector<Statement<REAL_T> > &storage) const {
             expr1_m.PushStatements(storage);
             expr2_m.PushStatements(storage);
-            storage.push_back(Statement<REAL_T > (ATAN2));
+            storage.push_back(Statement<REAL_T > (ATAN2, GetValue()));
         }
 
 
@@ -204,7 +204,12 @@ namespace et4ad {
             expr1_m.PushIds(ids);
         }
 
+        inline void PushStatements(std::vector<Statement<REAL_T> >&storage) const {
 
+            expr1_m.PushStatements(storage);
+            storage.push_back(Statement<REAL_T > (CONSTANT, expr2_m));
+            storage.push_back(Statement<REAL_T > (ATAN2, GetValue()));
+        }
 
 
         const EXPR1& expr1_m;
@@ -269,7 +274,7 @@ namespace et4ad {
         inline void PushStatements(std::vector<Statement<REAL_T> >&storage) const {
             storage.push_back(Statement<REAL_T > (CONSTANT, expr1_m));
             expr2_m.PushStatements(storage);
-            storage.push_back(Statement<REAL_T > (ATAN2));
+            storage.push_back(Statement<REAL_T > (ATAN2, GetValue()));
         }
 
 

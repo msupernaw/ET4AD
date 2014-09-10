@@ -63,7 +63,7 @@ namespace et4ad {
         inline void PushStatements(std::vector<Statement<REAL_T> > &storage) const {
             lhs_m.PushStatements(storage);
             rhs_m.PushStatements(storage);
-            storage.push_back(Statement<REAL_T > (MULTIPLY));
+            storage.push_back(Statement<REAL_T > (MULTIPLY, GetValue()));
         }
 
 
@@ -114,7 +114,7 @@ namespace et4ad {
         inline void PushStatements(std::vector<Statement<REAL_T> > &storage) const {
             lhs_m.PushStatements(storage);
             storage.push_back(Statement<REAL_T > (CONSTANT, rhs_m));
-            storage.push_back(Statement<REAL_T > (MULTIPLY));
+            storage.push_back(Statement<REAL_T > (MULTIPLY, GetValue()));
         }
 
 
@@ -168,7 +168,7 @@ namespace et4ad {
         inline void PushStatements(std::vector<Statement<REAL_T> > &storage) const {
             storage.push_back(Statement<REAL_T > (CONSTANT, lhs_m));
             rhs_m.PushStatements(storage);
-            storage.push_back(Statement<REAL_T > (MULTIPLY));
+            storage.push_back(Statement<REAL_T > (MULTIPLY, GetValue()));
         }
 
 
