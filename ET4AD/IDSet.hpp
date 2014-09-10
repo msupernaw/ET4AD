@@ -10,6 +10,7 @@
 
 #include "IDGenerator.hpp"
 #include <queue>
+#include <algorithm>
 
 namespace et4ad {
 

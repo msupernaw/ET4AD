@@ -13,6 +13,7 @@
 #include <valarray>
 #include <vector>
 #include <iomanip>
+#include <time.h>
 #include <sys/timeb.h>
 #include <sstream>
 //#include "BigFloat.hpp"
@@ -624,8 +625,8 @@ namespace et4ad {
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g1);
 
-                for (int i = 0; i < this->active_parameters_m.size(); i++) {
-                    g1[i] = f.WRT(*active_parameters_m[i]);
+                for (int j = 0; j < this->active_parameters_m.size(); j++) {
+                    g1[j] = f.WRT(*active_parameters_m[j]);
                 }
 
 
@@ -635,9 +636,10 @@ namespace et4ad {
                 active_parameters_m[i]->SetValue(xsave + sdelta2);
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g2);
-                for (int i = 0; i < this->active_parameters_m.size(); i++) {
-                    g2[i] = f.WRT(*active_parameters_m[i]);
+                for (int j = 0; j < this->active_parameters_m.size(); j++) {
+                    g2[j] = f.WRT(*active_parameters_m[j]);
                 }
+
 
                 active_parameters_m[i]->SetValue(xsave);
 
@@ -650,9 +652,10 @@ namespace et4ad {
                 f = 0.0;
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g1);
-                for (int i = 0; i < this->active_parameters_m.size(); i++) {
-                    g1[i] = f.WRT(*active_parameters_m[i]);
+                for (int j = 0; j < this->active_parameters_m.size(); j++) {
+                    g1[j] = f.WRT(*active_parameters_m[j]);
                 }
+
 
 
 
@@ -663,9 +666,10 @@ namespace et4ad {
                 f = 0.0;
                 this->ObjectiveFunction(f);
                 //                this->Gradient(f, this->active_parameters_m, g2);
-                for (int i = 0; i < this->active_parameters_m.size(); i++) {
-                    g2[i] = f.WRT(*active_parameters_m[i]);
+                for (int j = 0; j < this->active_parameters_m.size(); j++) {
+                    g2[j] = f.WRT(*active_parameters_m[j]);
                 }
+
 
                 active_parameters_m[i]->SetValue(xsave);
 
@@ -1708,7 +1712,7 @@ namespace et4ad {
          */
         int GetMilliCount() {
 #if defined(WIN32) || defined(WIN64) 
-            retrun GetTickCount();
+            return GetTickCount();
 #else
             timeb tb;
             ftime(&tb);

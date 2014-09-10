@@ -7,6 +7,7 @@
 
 #ifndef ET4AD_VARIABLE_HPP
 #define	ET4AD_VARIABLE_HPP
+#include <limits>
 #include <stack>
 //#include <boost/unordered_map.hpp>
 #include "VariableStorage.hpp"

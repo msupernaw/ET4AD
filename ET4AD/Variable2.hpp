@@ -7,6 +7,7 @@
 
 #ifndef VARIABLE2_HPP
 #define	VARIABLE2_HPP
+#include <limits>
 
 #include "Expression.hpp"
 #include "IDSet.hpp"
@@ -662,7 +663,7 @@ namespace et4ad2 {
                 }
             }
             SetValue(GetValue() - rhs.GetValue());
-            return *this
+            return *this;
         }
 
         DefaultVariable& operator-=(const REAL_T & rhs) {
