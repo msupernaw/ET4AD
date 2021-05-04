@@ -40,7 +40,7 @@ Example:
     
 
     for (int i = 0; i < size; i++) {
-        z(i) += slope + x(i) + intercept;
+        z(i) += slope * x(i) + intercept;
         //get the derivatice w.r.t. the slope.
         std::cout << z(i).WRT(slope) << std::endl;//should = 1
     }
